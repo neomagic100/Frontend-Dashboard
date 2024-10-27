@@ -1,0 +1,21 @@
+// Colors
+$background-color: rgb(23, 19, 37);
+$text-color: rgb(255,255,255);
+$highlight-color: rgb(50, 42, 80);
+$table-border-color: rgb(100, 89, 150);
+$header-bg-color: rgb(37, 29, 68);
+$even-row-bg: rgb(42, 34, 75);
+$odd-row-bg: rgb(23, 18, 39);
+$active-status-green: rgba(0, 200, 0, 0.75);
+$inactive-status-red: rgba(200, 0, 0, 0.75);
+
+// Mixins
+@mixin center-flex {
+   display: flex;
+   justify-content: center;
+   align-items: center;
+}
+
+@mixin transition-bg {
+   transition: background-color 0.2s ease-in-out;
+}
