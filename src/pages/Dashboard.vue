@@ -62,7 +62,7 @@ onUnmounted(() => clearInterval(startTimer));
 // Watch remainingTime to handle enableNow trigger
 watch(remainingTime, (newValue) => { if (newValue === 0) enableNow(); });
 
-setInterval(() => fetchData({ dns_queries_today, ads_blocked_today, ad_block_percentage, pi1Enabled, pi2Enabled, logObjs }), 3000);
+setInterval(() => fetchData({ dns_queries_today, ads_blocked_today, ad_block_percentage, pi1Enabled, pi2Enabled, logObjs }), 2000);
 
 // Action handlers
 const disableNow = () => {
