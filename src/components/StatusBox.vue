@@ -7,6 +7,7 @@
 
 <script setup lang="js">
 import { computed, defineProps } from 'vue';
+
 const props = defineProps({ status: Boolean, label: String });
 const statusColor = computed(() => (props.status ? 'rgba(0, 200, 0, 0.75)' : 'rgba(200, 0, 0, 0.75)'));
 </script>

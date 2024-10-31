@@ -3,7 +3,7 @@
       <div class="col-md-7 user-input">
          <input type="number" :value="disableMinutes" placeholder="60"
             @input="updateDisableMinutes($event.target.value)" />
-         <button class="btn btn-danger btn-md btn-block" @click="disableNow">
+         <button class="btn btn-danger btn-md btn-block" @click="disableNowByTimer">
             {{ isDisabled ? 'Disabled' : 'Disable Blocker' }}
          </button>
          <h4 class="timer-display">{{ formattedTime }}</h4>
@@ -23,7 +23,8 @@ const props = defineProps({
    formattedTime: String,
    isDisabled: Boolean,
    disableNow: Function,
-   enableNow: Function
+   enableNow: Function,
+   disableNowByTimer: Function
 });
 
 const emits = defineEmits(['update:disableMinutes', 'disableNow', 'enableNow']);
@@ -31,7 +32,7 @@ const emits = defineEmits(['update:disableMinutes', 'disableNow', 'enableNow']);
 // Emit an update event when disableMinutes changes
 const updateDisableMinutes = (value) => {
    emits('update:disableMinutes', Number(value));
-   console.log(props.formattedTime, props.disableMinutes)
+   console.log("Formatted Time: " + props.formattedTime, "Disable Minutes: " + props.disableMinutes)
 };
 </script>
 
