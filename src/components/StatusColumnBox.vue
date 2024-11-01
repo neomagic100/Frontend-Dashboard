@@ -6,7 +6,6 @@
       <div class="small-box bg-info">
          <div class="inner">
             <h3 :class="{ 'flash-green': flash }">
-               <!-- {{ props.dataType === "percent" ? `${value.toFixed(2)}%` : value }} -->
                {{ boxDataValue }}
             </h3>
             <h4>
@@ -94,7 +93,7 @@ const value = computed(() => {
       }
    }
 });
-const tempValueRef = ref(null);
+
 const formatForDataType = (val = value) => {
    let tempValue;
    if (typeof val === "string" || val.value === undefined) {
@@ -108,7 +107,7 @@ const formatForDataType = (val = value) => {
    }
 
    if (props.dataType === "int" && typeof tempValue === "number") {
-      return `${Math.floor(tempValue)}`;
+      return `${Math.floor(tempValue).toLocaleString()}`;
    } else if (props.dataType === "percent" && typeof tempValue === "number") {
       return `${tempValue.toFixed(2)}%`;
    } else if (props.dataType === "float" && typeof tempValue === "number") {
@@ -137,7 +136,7 @@ const tooltipText = computed(() => {
       return `Proxmox: ${formatDate(props.piValues.pi1)} RP: ${formatDate(props.piValues.pi2)}`
    }
    else {
-      return `Proxmox: ${props.piValues.pi1} RP: ${props.piValues.pi2}`
+      return `Proxmox: ${(props.piValues.pi1).toLocaleString()} RP: ${(props.piValues.pi2).toLocaleString()}`
    }
 
 
