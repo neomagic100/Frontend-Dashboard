@@ -18,9 +18,8 @@
 </template>
 
 <script setup>
-import { defineProps, watch, ref, defineOptions, computed } from 'vue';
+import { defineProps, watch, ref, computed } from 'vue';
 import dateHelper from '@/utils/dateHelper';
-import { tooltip } from '../directives/tooltip';
 const formatDate = dateHelper.formatDate;
 const averageDates = dateHelper.averageDates;
 const findMaxDate = dateHelper.findMaxDate;
@@ -98,7 +97,6 @@ const value = computed(() => {
 const tempValueRef = ref(null);
 const formatForDataType = (val = value) => {
    let tempValue;
-   console.log(val);
    if (typeof val === "string" || val.value === undefined) {
       tempValue = val;
    }
@@ -136,17 +134,10 @@ const tooltipText = computed(() => {
       return null;
    }
    if (props.dataType === "date") {
-      const date1 = computed(() => {
-         return props.piValues.pi1;
-      });
-      const date2 = computed(() => {
-         return props.piValues.pi2;
-      })
-
-      return `Proxmox: ${formatForDataType(date1)} RP: ${formatForDataType(date2)}`
+      return `Proxmox: ${formatDate(props.piValues.pi1)} RP: ${formatDate(props.piValues.pi2)}`
    }
    else {
-      return `Proxmox: ${formatForDataType(props.piValues.pi1)} RP: ${formatForDataType(props.piValues.pi2)}`
+      return `Proxmox: ${props.piValues.pi1} RP: ${props.piValues.pi2}`
    }
 
 

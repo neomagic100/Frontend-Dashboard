@@ -32,7 +32,6 @@ const emits = defineEmits(['update:disableMinutes', 'disableNow', 'enableNow']);
 // Emit an update event when disableMinutes changes
 const updateDisableMinutes = (value) => {
    emits('update:disableMinutes', Number(value));
-   console.log("Formatted Time: " + props.formattedTime, "Disable Minutes: " + props.disableMinutes)
 };
 </script>
 

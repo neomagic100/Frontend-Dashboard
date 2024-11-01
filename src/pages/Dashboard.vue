@@ -40,17 +40,12 @@ import LogTable from '@/components/LogTable.vue';
 import ContentHeader from '@/components/ContentHeader.vue';
 import LogQueue from '@/utils/LogQueue';
 import { fetchData, disablePi, enablePi, notify } from '@/utils/apiUtils.js';
-import { set } from '@vueuse/core';
 
-// Reactive references and setup
 const dns_queries_today = ref({ pi1: 0, pi2: 0 });
 const ads_blocked_today = ref({ pi1: 0, pi2: 0 });
 const ad_block_percentage = ref({ pi1: 0.0, pi2: 0.0 });
 const domains_blocked = ref({ pi1: 0, pi2: 0 });
-const gravity_last_updated = ref({
-   pi1: { days: 0, hours: 0, minutes: 0 },
-   pi2: { days: 0, hours: 0, minutes: 0 }
-});
+const gravity_last_updated = ref([{ pi1: { days: 0, hours: 0, minutes: 0 }, pi2: { days: 0, hours: 0, minutes: 0 } }]);
 const pi1Enabled = ref(false);
 const pi2Enabled = ref(false);
 const disableMinutes = ref(60);
