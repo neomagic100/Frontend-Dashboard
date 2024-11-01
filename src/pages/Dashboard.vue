@@ -12,12 +12,14 @@
                </div>
             </div>
             <div class="row">
-               <StatusColumnBox :piValues="dns_queries_today">DNS Queries Today</StatusColumnBox>
-               <StatusColumnBox :piValues="ads_blocked_today">Ads Blocked Today</StatusColumnBox>
-               <StatusColumnBox :piValues="ad_block_percentage" :isPercent="true">Ad Block Percentage
+               <StatusColumnBox :piValues="dns_queries_today" dataType="int" useSum>DNS Queries Today</StatusColumnBox>
+               <StatusColumnBox :piValues="ads_blocked_today" dataType="int" useSum>Ads Blocked Today</StatusColumnBox>
+               <StatusColumnBox :piValues="ad_block_percentage" dataType="percent" useAvg>Ad Block Percentage
                </StatusColumnBox>
-               <StatusColumnBox :piValues="domains_blocked">Domains Blocked</StatusColumnBox>
-               <StatusColumnBox :piValues="gravity_last_updated">Gravity Last Updated</StatusColumnBox>
+               <StatusColumnBox :piValues="domains_blocked" dataType="int" useAvg>Domains Blocked</StatusColumnBox>
+               <StatusColumnBox :piValues="gravity_last_updated" dataType="date" useFirstValue>Gravity Last
+                  Updated
+               </StatusColumnBox>
                <ActionButtonGroup :disableMinutes="disableMinutes" :formattedTime="formattedTime"
                   :isDisabled="isDisabled" @update:disableMinutes="disableMinutes = $event" @disableNow="disableNow"
                   @enableNow="enableNow" :disableNow="disableNow" :enableNow="enableNow"
@@ -38,6 +40,7 @@ import LogTable from '@/components/LogTable.vue';
 import ContentHeader from '@/components/ContentHeader.vue';
 import LogQueue from '@/utils/LogQueue';
 import { fetchData, disablePi, enablePi, notify } from '@/utils/apiUtils.js';
+import { set } from '@vueuse/core';
 
 // Reactive references and setup
 const dns_queries_today = ref({ pi1: 0, pi2: 0 });
@@ -53,7 +56,6 @@ const pi2Enabled = ref(false);
 const disableMinutes = ref(60);
 const remainingTime = ref(0);
 const logObjs = ref(new LogQueue());
-var timer = null;
 
 // Computed properties
 const isDisabled = computed(() => remainingTime.value > 0);
@@ -72,20 +74,19 @@ onMounted(() => fetchData({
    ad_block_percentage: ad_block_percentage.value,
    domains_blocked: domains_blocked.value,
    gravity_last_updated: gravity_last_updated.value, pi1Enabled, pi2Enabled, logObjs
-}));
+}).then(setInterval(() => fetchData({
+   dns_queries_today: dns_queries_today.value,
+   ads_blocked_today: ads_blocked_today.value,
+   ad_block_percentage: ad_block_percentage.value,
+   domains_blocked: domains_blocked.value,
+   gravity_last_updated: gravity_last_updated.value, pi1Enabled, pi2Enabled, logObjs
+}), 2000)));
 onUnmounted(() => clearInterval(startTimer));
 
 // Watch remainingTime to handle enableNow trigger
 watch(remainingTime, (newValue) => { if (newValue === 0) enableNow(); console.log("remainingTime", newValue); });
 watch(formattedTime, (newValue) => { console.log("formattedTime", newValue); });
 watch(disableMinutes, (newValue) => { console.log("disableMinutes", newValue); });
-setInterval(() => fetchData({
-   dns_queries_today: dns_queries_today.value,
-   ads_blocked_today: ads_blocked_today.value,
-   ad_block_percentage: ad_block_percentage.value,
-   domains_blocked: domains_blocked.value,
-   gravity_last_updated: gravity_last_updated.value, pi1Enabled, pi2Enabled, logObjs
-}), 2000);
 
 // Action handlers
 const disableNowByTimer = () => {
@@ -102,7 +103,6 @@ const startTimer = (duration) => {
       if (duration <= 0) clearInterval(timer);
       else duration -= 1;
    }, duration * 1000);
-
 }
 
 const disableNow = () => {

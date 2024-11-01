@@ -1,10 +1,13 @@
 <template>
-   <div v-if="tooltipText" v-tooltip="tooltipText || ''" class="col-lg-3 col-6">
+   <div v-if="tooltipText"
+      v-tooltip="(props.dataType !== 'date') ? tooltipText : `Proxmox: ${formatDate(props.piValues.pi1)} RP: ${formatDate(props.piValues.pi2)}` || 'Loading...'"
+      class="col-lg-3 col-6">
       <!-- small box -->
       <div class="small-box bg-info">
          <div class="inner">
             <h3 :class="{ 'flash-green': flash }">
-               {{ props.isPercent ? `${value.toFixed(2)}%` : value }}
+               <!-- {{ props.dataType === "percent" ? `${value.toFixed(2)}%` : value }} -->
+               {{ boxDataValue }}
             </h3>
             <h4>
                <slot></slot>
@@ -17,56 +20,142 @@
 <script setup>
 import { defineProps, watch, ref, defineOptions, computed } from 'vue';
 import dateHelper from '@/utils/dateHelper';
+import { tooltip } from '../directives/tooltip';
 const formatDate = dateHelper.formatDate;
 const averageDates = dateHelper.averageDates;
+const findMaxDate = dateHelper.findMaxDate;
 
 const props = defineProps({
    piValues: {
       type: Object,
       required: true,
    },
-   isPercent: {
+   dataType: {
+      type: String,
+      validator: (value) => {
+         return ['int', 'percent', 'float', 'date'].includes(value);
+      },
+      default: 'int',
+      required: true,
+   },
+   useSum: {
+      type: Boolean,
+      default: true,
+      required: false,
+   },
+   useMax: {
       type: Boolean,
       default: false,
       required: false,
    },
+   useAvg: {
+      type: Boolean,
+      default: false,
+      required: false,
+   },
+   useFirstValue: {
+      type: Boolean,
+      default: false,
+      required: false,
+   }
 });
+
+const tooltipTextFormatted = ref(null);
 
 const value = computed(() => {
    if (!props.piValues.pi1 || !props.piValues.pi2) {
       return props.piValues.pi1 ?? props.piValues.pi2 ?? 0;
    }
 
-   if (typeof props.piValues.pi1 === "object" && typeof props.piValues.pi2 === "object" && !props.piValues.pi1.days && !props.piValues.pi2.days) {
-      return props.piValues.pi1 ?? props.piValues.pi2 ?? 0;
-   }
-   if (props.isPercent) {
-      return (props.piValues.pi1 + props.piValues.pi2) / 2;
-   } else if (typeof props.piValues.pi1 === "number" && typeof props.piValues.pi2 === "number") {
-      return props.piValues.pi1 + props.piValues.pi2;
-   } else if (typeof props.piValues.pi1 === "object" && typeof props.piValues.pi2 === "object") {
-      return formatDate(averageDates(props.piValues.pi1, props.piValues.pi2));
+   if (props.dataType === "int" || props.dataType === "float" || props.dataType === "percent") {
+      if (props.useMax) {
+         return Math.max(props.piValues.pi1, props.piValues.pi2);
+      }
+      else if (props.useFirstValue) {
+         return props.piValues.pi1;
+      }
+      else if (props.useAvg) {
+         return (props.piValues.pi1 + props.piValues.pi2) / 2;
+      }
+      else {
+         return props.piValues.pi1 + props.piValues.pi2;
+      }
+   } else if (props.dataType === "date") {
+      if (props.useMax) {
+         return findMaxDate(props.piValues.pi1, props.piValues.pi2);
+      }
+      else if (props.useFirstValue) {
+         return props.piValues.pi1;
+      }
+      else if (props.useAvg) {
+         return averageDates(props.piValues.pi1, props.piValues.pi2);
+      }
+      else {
+         return props.piValues.pi1 + props.piValues.pi2;
+      }
    }
 });
+const tempValueRef = ref(null);
+const formatForDataType = (val = value) => {
+   let tempValue;
+   console.log(val);
+   if (typeof val === "string" || val.value === undefined) {
+      tempValue = val;
+   }
+   else if (value.value === null || value.value === undefined) {
+      tempValue = 0;
+   }
+   else {
+      tempValue = val.value;
+   }
+
+   if (props.dataType === "int" && typeof tempValue === "number") {
+      return `${Math.floor(tempValue)}`;
+   } else if (props.dataType === "percent" && typeof tempValue === "number") {
+      return `${tempValue.toFixed(2)}%`;
+   } else if (props.dataType === "float" && typeof tempValue === "number") {
+      return `${tempValue.toFixed(2)}`;
+   } else if (props.dataType === "date" && typeof tempValue === "object") {
+      return formatDate(tempValue);
+   }
+   else {
+      return tempValue;
+   }
+}
+
+const boxDataValue = computed(() => {
+   return formatForDataType();
+})
 
 watch(() => props.piValues, (newVal, oldVal) => {
-   console.log('piValues updated:', newVal);
+   console.log('piValues updated:', newVal.pi1, newVal.pi2, (props.dataType === "percent") ? "percentage" : "");
 });
+
 const tooltipText = computed(() => {
-   if (!props.piValues.pi1 || !props.piValues.pi2) {
+   if (!props.piValues.pi1 && !props.piValues.pi2) {
       return null;
    }
-   if (typeof props.piValues.pi1 === "object" && typeof props.piValues.pi2 === "object" && !props.piValues.pi1.days && !props.piValues.pi2.days) {
-      return null;
+   if (props.dataType === "date") {
+      const date1 = computed(() => {
+         return props.piValues.pi1;
+      });
+      const date2 = computed(() => {
+         return props.piValues.pi2;
+      })
+
+      return `Proxmox: ${formatForDataType(date1)} RP: ${formatForDataType(date2)}`
    }
-   if (props.isPercent && typeof props.piValues.pi1 === "number" && typeof props.piValues.pi2 === "number") {
-      return `Proxmox: ${props.piValues.pi1.toFixed(2)}%, RP: ${props.piValues.pi2.toFixed(2)}%`;
-   } else if (typeof props.piValues.pi1 === "object" && typeof props.piValues.pi2 === "object") {
-      return `Proxmox: ${formatDate(props.piValues.pi1)}, RP: ${formatDate(props.piValues.pi2)}`;
-   } else if (typeof props.piValues.pi1 === "number" && typeof props.piValues.pi2 === "number") {
-      return `Proxmox: ${props.piValues.pi1}, RP: ${props.piValues.pi2}`;
+   else {
+      return `Proxmox: ${formatForDataType(props.piValues.pi1)} RP: ${formatForDataType(props.piValues.pi2)}`
    }
+
+
 });
+
+tooltipTextFormatted.value = tooltipText.value;
+setInterval(() => {
+   tooltipTextFormatted.value = tooltipText.value;
+}, 2000);
 
 const flash = ref(false);
 const flashTimeout = ref(null);
