@@ -100,14 +100,14 @@ async function togglePi(action) {
    }
 }
 
-// Timer
-export function startTimer(duration) {
-   const timer = setInterval(() => {
-      if (duration <= 0) clearInterval(timer);
-      else duration -= 1;
-   }, duration * 1000);
-   return timer;
-}
+// // Timer
+// export function startTimer(duration) {
+//    const timer = setInterval(() => {
+//       if (duration <= 0) clearInterval(timer);
+//       else duration -= 1;
+//    }, duration * 1000);
+//    return timer;
+// }
 
 // Notification function
 export function notify(statusChange) {

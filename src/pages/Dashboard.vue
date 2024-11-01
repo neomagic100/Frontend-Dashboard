@@ -20,6 +20,8 @@
                <StatusColumnBox :piValues="gravity_last_updated" dataType="date" useFirstValue>Gravity Last
                   Updated
                </StatusColumnBox>
+            </div>
+            <div class="row">
                <ActionButtonGroup :disableMinutes="disableMinutes" :formattedTime="formattedTime"
                   :isDisabled="isDisabled" @update:disableMinutes="disableMinutes = $event" @disableNow="disableNow"
                   @enableNow="enableNow" :disableNow="disableNow" :enableNow="enableNow"
@@ -51,7 +53,9 @@ const pi2Enabled = ref(false);
 const disableMinutes = ref(60);
 const remainingTime = ref(0);
 const logObjs = ref(new LogQueue());
-
+const globalTimer = { timerId: null };
+const toastTimerId = ref({ enabled: null, disabled: null });
+const toastShowing = ref({ enabled: false, disabled: false });
 // Computed properties
 const isDisabled = computed(() => remainingTime.value > 0);
 const formattedTime = computed(() => {
@@ -79,9 +83,7 @@ onMounted(() => fetchData({
 onUnmounted(() => clearInterval(startTimer));
 
 // Watch remainingTime to handle enableNow trigger
-watch(remainingTime, (newValue) => { if (newValue === 0) enableNow(); console.log("remainingTime", newValue); });
-watch(formattedTime, (newValue) => { console.log("formattedTime", newValue); });
-watch(disableMinutes, (newValue) => { console.log("disableMinutes", newValue); });
+watch(remainingTime, (newValue, oldValue) => { if (newValue === 0 && oldValue > 0) enableNow() });
 
 // Action handlers
 const disableNowByTimer = () => {
@@ -91,23 +93,71 @@ const disableNowByTimer = () => {
    console.log("disableMinutes", disableMinutes.value);
    disableNow();
 }
+watch(toastShowing, (newValue, oldValue) => {
+   if (!newValue.enabled && oldValue.enabled) {
+      clearInterval(toastTimerId.enableToast);
+      toastTimerId.enableToast = null;
+   }
+   if (!newValue.disabled && oldValue.disabled) {
+      clearInterval(toastTimerId.disableToast);
+      toastTimerId.disableToast = null;
+   }
+
+});
 
 const startTimer = (duration) => {
-   console.log("startTimer", duration);
-   const timer = setInterval(() => {
-      if (duration <= 0) clearInterval(timer);
-      else duration -= 1;
-   }, duration * 1000);
-}
+   globalTimer.timerId = setInterval(() => {
+      if (duration <= 0) {
+         enableNow();
+      } else {
+         remainingTime.value = duration;
+         duration -= 1;
+      }
+   }, 1000); // 1000ms = 1s
+};
+
+const startEnableToastTimer = (duration = 5) => {
+   notify("enabled");
+   toastTimerId.enableToast = setInterval(() => {
+      if (duration <= 0) {
+         toastShowing.enabled = false;
+      } else {
+         toastShowing.enabled = true;
+         duration -= 1;
+      }
+   }, 1000);
+};
+
+const startDisableToastTimer = (duration = 5) => {
+   notify("disabled");
+   toastTimerId.disableToast = setInterval(() => {
+      if (duration <= 0) {
+         toastShowing.disabled = false;
+      } else {
+         toastShowing.disabled = true;
+         duration -= 1;
+      }
+   }, 1000);
+};
 
 const disableNow = () => {
    disablePi();
-   notify("disabled");
+   remainingTime.value = 0;
+   clearInterval(globalTimer.timerId);
+   if (!toastShowing.disabled) {
+      startDisableToastTimer();
+
+   }
+   // notify("disabled");
 };
 const enableNow = () => {
    remainingTime.value = 0;
+   clearInterval(globalTimer.timerId);
    enablePi();
-   notify("enabled");
+   if (!toastShowing.enabled) {
+      startEnableToastTimer();
+
+   }
 };
 
 </script>

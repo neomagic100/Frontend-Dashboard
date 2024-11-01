@@ -138,8 +138,6 @@ const tooltipText = computed(() => {
    else {
       return `Proxmox: ${(props.piValues.pi1).toLocaleString()} RP: ${(props.piValues.pi2).toLocaleString()}`
    }
-
-
 });
 
 tooltipTextFormatted.value = tooltipText.value;
