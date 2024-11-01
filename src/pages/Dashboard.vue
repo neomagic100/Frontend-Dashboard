@@ -25,7 +25,7 @@
                <ActionButtonGroup :disableMinutes="disableMinutes" :formattedTime="formattedTime"
                   :isDisabled="isDisabled" @update:disableMinutes="disableMinutes = $event" @disableNow="disableNow"
                   @enableNow="enableNow" :disableNow="disableNow" :enableNow="enableNow"
-                  :disableNowByTimer="disableNowByTimer" />
+                  :disableNowByTimer="disableNowByTimer" @disableNowByTimer="disableNowByTimer" />
                <LogTable :logs="logObjs" />
             </div>
          </div>
@@ -84,13 +84,10 @@ onUnmounted(() => clearInterval(startTimer));
 
 // Watch remainingTime to handle enableNow trigger
 watch(remainingTime, (newValue, oldValue) => { if (newValue === 0 && oldValue > 0) enableNow() });
-
 // Action handlers
 const disableNowByTimer = () => {
    remainingTime.value = disableMinutes.value * 60;
    startTimer(disableMinutes.value * 60);
-   console.log("remainingTime", remainingTime.value);
-   console.log("disableMinutes", disableMinutes.value);
    disableNow();
 }
 watch(toastShowing, (newValue, oldValue) => {
@@ -106,7 +103,7 @@ watch(toastShowing, (newValue, oldValue) => {
 });
 
 const startTimer = (duration) => {
-   globalTimer.timerId = setInterval(() => {
+   const timer = setInterval(() => {
       if (duration <= 0) {
          enableNow();
       } else {
@@ -114,6 +111,7 @@ const startTimer = (duration) => {
          duration -= 1;
       }
    }, 1000); // 1000ms = 1s
+   globalTimer.timerId = timer;
 };
 
 const startEnableToastTimer = (duration = 5) => {
@@ -142,13 +140,9 @@ const startDisableToastTimer = (duration = 5) => {
 
 const disableNow = () => {
    disablePi();
-   remainingTime.value = 0;
-   clearInterval(globalTimer.timerId);
    if (!toastShowing.disabled) {
       startDisableToastTimer();
-
    }
-   // notify("disabled");
 };
 const enableNow = () => {
    remainingTime.value = 0;

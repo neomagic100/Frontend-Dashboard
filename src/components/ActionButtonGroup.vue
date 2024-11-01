@@ -4,19 +4,19 @@
          <div class="input-group">
             <input type="number" :value="disableMinutes" placeholder="60"
                @input="updateDisableMinutes($event.target.value)" />
-            <button class="btn btn-danger btn-md btn-block" @click="disableNowByTimer">
+            <button class="btn btn-danger btn-md btn-block" @click="emitDisabledNowByTimer()">
                {{ isDisabled ? 'Disabled' : 'Disable Blocker' }}
             </button>
             <h4 class="timer-display">{{ formattedTime }}</h4>
          </div>
          <!-- <div class="input-group"> -->
-         <TimerButtonGroup :disableMinutes="disableMinutes" @disableFor="updateDisableMinutes($event.target.value)" />
+         <TimerButtonGroup @disableForPreset="disableNowByTimerPreset" />
          <!-- </div> -->
       </div>
       <div class="col-md-5 user-input">
          <div class="input-group">
-            <button class="btn btn-success" @click="enableNow()">Enable Now</button>
-            <button class="btn btn-danger" @click="disableNow()">Disable Now</button>
+            <button class="btn btn-success" @click="doEnableNow()">Enable Now</button>
+            <button class="btn btn-danger" @click="doDisableNow()">Disable Now</button>
          </div>
          <div class="input-group">
          </div>
@@ -25,7 +25,7 @@
 </template>
 
 <script setup lang="js">
-import { defineProps, defineEmits, ref } from 'vue';
+import { defineProps, defineEmits, watch } from 'vue';
 import TimerButtonGroup from './TimerButtonGroup.vue';
 
 const props = defineProps({
@@ -39,9 +39,26 @@ const props = defineProps({
 
 const emits = defineEmits(['update:disableMinutes', 'disableNow', 'enableNow']);
 
+const doEnableNow = () => {
+   emits('enableNow');
+}
+
+const doDisableNow = () => {
+   emits('disableNow');
+}
+
+const emitDisabledNowByTimer = () => {
+   emits('disableNowByTimer');
+}
+
+const disableNowByTimerPreset = (time) => {
+   console.log(time);
+   updateDisableMinutes(Number(time));
+   emits('disableNowByTimer');
+}
+
 // Emit an update event when disableMinutes changes
 const updateDisableMinutes = (value) => {
-   console.log("value", value);
    emits('update:disableMinutes', Number(value));
 };
 </script>

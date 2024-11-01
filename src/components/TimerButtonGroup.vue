@@ -9,22 +9,14 @@
 </template>
 
 <script setup>
-import { defineEmits, defineProps } from 'vue';
-import { ref } from 'vue';
+import { defineEmits } from 'vue';
 
 const definedTimes = [5, 15, 30, 60, 120];
-const props = defineProps({
-   disableMinutes: Number
-})
-const emits = defineEmits({
-   disableFor: Number,
-   'update:disableMinutes': Number
-})
+const emits = defineEmits(['disableForPreset']);
 
 const disableFor = (time) => {
-   emits('disableFor', time);
+   emits('disableForPreset', Number(time));
 };
-
 </script>
 
 <style lang="scss" scoped>
