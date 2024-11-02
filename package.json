@@ -12,10 +12,11 @@
     "@popperjs/core": "^2.11.8",
     "@vueuse/core": "^11.1.0",
     "bootstrap": "^5.3.3",
+    "pocketbase": "^0.21.5",
+    "sass": "^1.80.4",
     "vue": "^3.5.12",
     "vue-facing-decorator": "^3.0.4",
-    "vue3-toastify": "^0.2.3",
-    "sass": "^1.80.4"
+    "vue3-toastify": "^0.2.3"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.1.4",
