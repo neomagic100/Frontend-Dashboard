@@ -1,7 +1,7 @@
 <template>
    <div :class="['inner', 'center', 'statusBox', { 'statusBox--active': status }]"
       :style="{ backgroundColor: statusColor }">
-      <h4>{{ label }}: {{ status ? 'Up' : 'Down' }}</h4>
+      <h4 class="status-text">{{ label }}: {{ status ? 'Up' : 'Down' }}</h4>
    </div>
 </template>
 
@@ -29,5 +29,10 @@ const statusColor = computed(() => (props.status ? 'rgba(0, 200, 0, 0.75)' : 'rg
    &--active {
       background-color: $active-status-green;
    }
+}
+
+.status-text {
+   font-family: 'bender-solid', sans-serif;
+   font-size: 25pt;
 }
 </style>

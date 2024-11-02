@@ -1,15 +1,11 @@
 <template>
    <div>
-      <ContentHeader title="Dashboard" />
+      <ContentHeader title="Pi-Hole Dashboard" />
       <section class="content">
          <div class="container-fluid">
-            <div class="row">
-               <div class="col-lg-3 col-6">
-                  <StatusBox :status="pi1Enabled" label="Proxmox Status" />
-               </div>
-               <div class="col-lg-3 col-6">
-                  <StatusBox :status="pi2Enabled" label="Raspberry Pi Status" />
-               </div>
+            <div class="pi-status">
+               <StatusBox :status="pi1Enabled" class="pi-status-box" label="Proxmox Status" />
+               <StatusBox :status="pi2Enabled" class="pi-status-box" label="Raspberry Pi Status" />
             </div>
             <div class="row">
                <StatusColumnBox :piValues="dns_queries_today" dataType="int" useSum>DNS Queries Today</StatusColumnBox>
@@ -165,5 +161,30 @@ body {
 
 h1.m-0 {
    color: white;
+}
+
+
+.pi-status {
+   display: flex;
+   flex-direction: row;
+   justify-content: space-around;
+   align-items: center;
+   padding: 10px 0;
+   margin-bottom: 25px;
+   border-radius: 20px;
+
+
+   .pi-status-box {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      margin-bottom: 5px;
+      border-radius: 20px;
+      box-shadow: 0 3px 3px rgba(10, 200, 75);
+      border-style: bevel;
+   }
+
 }
 </style>

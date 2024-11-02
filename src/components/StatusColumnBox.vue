@@ -162,6 +162,16 @@ watch(() => props.value, (newValue, oldValue) => {
 <style scoped>
 .inner {
    text-align: center;
+   font-family: "bender-solid";
+
+   h3 {
+      font-size: 20pt !important;
+   }
+
+   h4 {
+      font-size: 25pt !important;
+   }
+
 }
 
 .flash-green {

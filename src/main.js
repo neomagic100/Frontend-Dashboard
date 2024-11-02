@@ -4,6 +4,7 @@ import "./assets/variables.scss";
 import App from "./App.vue";
 import { tooltip } from "./directives/tooltip";
 import "./assets/styles/tooltip.scss";
+import "./assets/fonts.scss";
 
 const app = createApp(App);
 // Add the tooltip directive

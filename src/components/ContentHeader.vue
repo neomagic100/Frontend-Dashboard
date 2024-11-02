@@ -22,5 +22,6 @@ const props = defineProps({ title: String });
    border-radius: 20px;
    background-color: adjust-color($color: $background-color, $saturation: 10%, $lightness: 10%, $alpha: 1.0, $hue: 0) !important;
    box-shadow: 0 2px 4px adjust-color($color: $background-color, $saturation: 10%, $lightness: 30%, $alpha: 1.0, $hue: 0);
+   font-family: "orbitron-bold";
 }
 </style>
