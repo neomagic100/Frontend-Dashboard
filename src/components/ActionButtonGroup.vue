@@ -1,6 +1,6 @@
 <template>
-   <div class="row action-group">
-      <div class="col-md-7 user-input inline-timer">
+   <div class="action-group">
+      <div class=" user-input inline-timer">
          <div class="input-group">
             <input type="number" :value="disableMinutes" placeholder="60"
                @input="updateDisableMinutes($event.target.value)" />
@@ -13,10 +13,10 @@
          <TimerButtonGroup @disableForPreset="disableNowByTimerPreset" />
          <!-- </div> -->
       </div>
-      <div class="col-md-5 user-input">
+      <div class=" user-input">
          <div class="input-group">
-            <button class="btn btn-success" @click="doEnableNow()">Enable Now</button>
-            <button class="btn btn-danger" @click="doDisableNow()">Disable Now</button>
+            <button class="btn btn-success status-set-btn" @click="doEnableNow()">Enable Now</button>
+            <button class="btn btn-danger status-set-btn" @click="doDisableNow()">Disable Now</button>
          </div>
          <div class="input-group">
          </div>
@@ -96,19 +96,23 @@ const updateDisableMinutes = (value) => {
    }
 
    .input-group {
-      display: inline-flex;
-      flex-direction: row;
+      display: flex;
+      flex-direction: co;
       justify-content: space-between;
       align-items: center;
 
 
+
       .user-input {
-         display: inline-flex;
+         display: flex;
          justify-content: space-around;
+         flex-direction: column;
+
          align-items: center;
          // padding: 10px 0;
          // margin-bottom: 25px;
          border-radius: 20px;
+
 
          input {
             width: 75px;
@@ -137,6 +141,67 @@ const updateDisableMinutes = (value) => {
    button {
       margin-left: 5px;
       margin-right: 5px;
+   }
+}
+
+@media (max-width: 768px) {
+   .action-group {
+      margin: .75rem;
+      padding: .25rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+
+      .inline-timer {
+         text-align: center;
+         padding: 0;
+         margin: 0;
+         box-shadow: none;
+         border-style: none;
+      }
+
+      .input-group {
+         margin-bottom: 0.25rem;
+         border-radius: 0.25rem;
+         text-align: center;
+         box-shadow: none;
+         border-style: none;
+
+
+         input {
+            width: 8rem;
+            padding: .25rem;
+            margin: .25rem;
+            height: 2.5rem;
+            font-size: 1.5rem;
+            text-align: center;
+         }
+
+         .timer-display {
+            font-size: 2rem;
+            margin: .25rem;
+
+         }
+
+         button {
+            margin: .25rem;
+            padding: .5rem;
+            font-size: 1.2rem;
+            border-radius: 1rem !important;
+         }
+
+         .status-set-btn {
+            justify-content: space-around;
+            flex-wrap: nowrap;
+            text-wrap: nowrap;
+            font-size: 1.5em !important;
+            padding: .5rem !important;
+            margin: .5rem;
+            margin-right: 1.5rem;
+            margin-left: 1.5rem;
+         }
+      }
    }
 }
 </style>

@@ -253,9 +253,9 @@ h1.m-0 {
    flex-direction: row;
    justify-content: space-around;
    align-items: center;
-   padding: 10px 0;
-   margin-bottom: 25px;
-   border-radius: 20px;
+   padding: .25rem 0;
+   margin-bottom: 0.5rem;
+   border-radius: 0.25rem;
 
 
    .pi-status-box {
@@ -263,12 +263,50 @@ h1.m-0 {
       flex-direction: column;
       justify-content: space-between;
       align-items: center;
-      padding: 10px 20px;
+      padding: .75rem 5rem;
       margin-bottom: 5px;
       border-radius: 20px;
       box-shadow: 0 3px 3px rgba(10, 200, 75);
       border-style: bevel;
    }
+}
 
+@media (max-width: 768px) {
+   .row {
+      display: flex;
+      flex-direction: column;
+
+      justify-content: space-around;
+
+      align-items: center;
+      padding: 0;
+      margin-bottom: 0.25rem;
+      border-radius: 0.25rem;
+      width: 100%;
+   }
+
+   .pi-status {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-around;
+      align-items: center;
+      padding: 0;
+      margin-bottom: 0.25rem;
+      border-radius: 0.25rem;
+
+      .pi-status-box {
+         width: 100%;
+         padding: .25rem .25rem;
+         margin: .25rem, .25rem, 0, .25rem;
+         box-shadow: none;
+         border-style: none;
+
+      }
+   }
+
+   .Toastify {
+      animation-duration: 1000ms !important;
+      opacity: 0.75 !important;
+   }
 }
 </style>

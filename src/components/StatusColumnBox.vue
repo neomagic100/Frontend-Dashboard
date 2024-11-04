@@ -1,7 +1,7 @@
 <template>
    <div v-if="tooltipText"
       v-tooltip="(props.dataType !== 'date') ? tooltipText : `Proxmox: ${formatDate(props.piValues.pi1)} RP: ${formatDate(props.piValues.pi2)}` || 'Loading...'"
-      class="col-lg-3 col-6">
+      class="col-lg-3 col-md-6 col-sm-12">
       <!-- small box -->
       <div class="small-box bg-info">
          <div class="inner">
@@ -165,13 +165,48 @@ watch(() => props.value, (newValue, oldValue) => {
    font-family: "bender-solid";
 
    h3 {
-      font-size: 20pt !important;
+      font-size: 30pt !important;
    }
 
    h4 {
       font-size: 25pt !important;
    }
 
+}
+
+@media (max-width: 768px) {
+   .col-sm-12 {
+      width: 85%;
+      margin: 0 auto;
+      padding: .25rem;
+
+      .inner {
+         display: inline-flex;
+         flex-direction: row-reverse;
+         justify-content: space-around;
+         align-items: center;
+         padding: 0;
+         margin-bottom: 0.25rem;
+         border-radius: 0.25rem;
+         text-align: center;
+         width: 100%;
+         padding: .25rem .25rem;
+         margin: .25rem, .25rem, 0, .25rem;
+         box-shadow: none;
+         border-style: none;
+
+
+         h3 {
+            font-size: 22pt !important;
+         }
+
+         h4 {
+            font-size: 16pt !important;
+            text-wrap: nowrap;
+            text-overflow: ellipsis;
+         }
+      }
+   }
 }
 
 .flash-green {
