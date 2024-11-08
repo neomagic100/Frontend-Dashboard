@@ -1,16 +1,16 @@
 <template>
    <div class="table-responsive">
-      <h4>Log Objects</h4>
+      <h4 class="text-center table-title">Query Log</h4>
       <table class="table-bordered">
          <thead>
             <tr>
                <th>Time</th>
-               <th>Query Type</th>
+               <th class="hide-small">Query Type</th>
                <th>Domain Queried</th>
                <th>Handled By</th>
-               <th>Origin Client</th>
+               <th class="hide-small">Origin Client</th>
                <th>Status</th>
-               <th>Action Taken</th>
+               <th class="hide-small">Action Taken</th>
             </tr>
          </thead>
          <tbody>
@@ -19,16 +19,16 @@
             </tr>
             <tr v-for="log in logArray" :key="log.id">
                <td>{{ log.time }}</td>
-               <td>{{ log.queryType }}</td>
+               <td class="hide-small">{{ log.queryType }}</td>
                <td
                   :style="{ color: (log.actionTaken === 'Blocked' && log.status.includes('Blocked')) ? 'red' : 'inherit' }">
                   {{ log.domainQueried }}</td>
                <a :href="(log.handledBy === 'Proxmox') ? config.url : config.url2">
                   <td>{{ log.handledBy }}</td>
                </a>
-               <td>{{ log.originClient }}</td>
+               <td class="hide-small">{{ log.originClient }}</td>
                <td>{{ log.status }}</td>
-               <td>{{ log.actionTaken }}</td>
+               <td class="hide-small">{{ log.actionTaken }}</td>
             </tr>
          </tbody>
       </table>
@@ -42,13 +42,23 @@ const props = defineProps({ logs: Array });
 const logArray = props.logs.toArray();
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @import '@/assets/variables.scss';
 
 .table-responsive {
    background-color: #2e2b3d;
    padding: 15px;
    border-radius: 8px;
+}
+
+h4 {
+   font-family: "Bender-Solid", sans-serif;
+   color: $text-color;
+   width: fit-content;
+   align-self: center;
+   justify-self: center;
+   margin-bottom: 1rem;
+   font-size: xx-large;
 }
 
 table {
@@ -90,6 +100,12 @@ table {
          vertical-align: middle;
          background-color: inherit;
 
+         &.hide-small {
+            @media (max-width: 768px) {
+               display: none;
+            }
+         }
+
          a {
             color: $text-color;
             text-decoration: underline;
@@ -103,6 +119,24 @@ table {
             }
          }
       }
+   }
+}
+
+@media (max-width: 768px) {
+   .table-title {
+      position: sticky !important;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1;
+   }
+
+   .table-responsive {
+      padding: 0;
+   }
+
+   .hide-small {
+      display: none;
    }
 }
 </style>

@@ -1,6 +1,6 @@
 <template>
-   <div class="row mt-3">
-      <div class="timer-button-group">
+   <div class="row">
+      <div class="timer-button-group col-lg-auto">
          <button v-for="time in definedTimes" :key="time" class="btn btn-info time-button"
             @click="disableFor(time)"><span class="time-btn-text"><strong>{{ time }}
                   min</strong></span></button>
@@ -19,7 +19,7 @@ const disableFor = (time) => {
 };
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 @import '@/assets/variables.scss';
 
 .timer-button-group {
@@ -32,17 +32,44 @@ const disableFor = (time) => {
    // box-shadow: 0 2px 4px adjust-color($color: $background-color, $saturation: 10%, $lightness: 30%, $alpha: 1.0, $hue: 0);
    // box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 
-   // padding: 10px 0;
-   // margin-bottom: 25px;
+   padding: 10px 0;
+   margin-bottom: 25px;
+
    .time-button {
-      width: 17%;
-      text-wrap-mode: nowrap;
 
 
       .time-btn-text {
          align-items: center;
          justify-content: center;
          display: flex;
+      }
+   }
+}
+
+@media (max-width: 768px) {
+   .timer-button-group {
+      display: flex;
+
+      flex-wrap: wrap;
+      justify-content: space-around;
+      margin-left: .5rem;
+      margin-right: .5rem;
+
+
+
+      .time-button {
+         width: 30%;
+         margin-top: .5rem;
+         margin-bottom: .5rem;
+         height: 3.5rem;
+
+         .time-btn-text {
+            font-size: 1.5em;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+
+         }
       }
    }
 }
