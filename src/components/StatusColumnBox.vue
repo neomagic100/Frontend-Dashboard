@@ -1,10 +1,12 @@
 <template>
-   <div class="col-lg-3 col-6">
+   <div v-if="tooltipText"
+      v-tooltip="(props.dataType !== 'date') ? tooltipText : `Proxmox: ${formatDate(props.piValues.pi1)} RP: ${formatDate(props.piValues.pi2)}` || 'Loading...'"
+      class="col-lg-3 col-md-6 col-sm-12">
       <!-- small box -->
       <div class="small-box bg-info">
          <div class="inner">
             <h3 :class="{ 'flash-green': flash }">
-               {{ typeof value === 'number' && !Number.isInteger(value) ? `${value.toFixed(2)}%` : value }}
+               {{ boxDataValue }}
             </h3>
             <h4>
                <slot></slot>
@@ -14,37 +16,197 @@
    </div>
 </template>
 
-<script>
-export default {
-   props: {
-      value: {
-         type: [Number, String],
-         required: true
+<script setup>
+import { defineProps, watch, ref, computed } from 'vue';
+import dateHelper from '@/utils/dateHelper';
+const formatDate = dateHelper.formatDate;
+const averageDates = dateHelper.averageDates;
+const findMaxDate = dateHelper.findMaxDate;
+
+const props = defineProps({
+   piValues: {
+      type: Object,
+      required: true,
+   },
+   dataType: {
+      type: String,
+      validator: (value) => {
+         return ['int', 'percent', 'float', 'date'].includes(value);
       },
+      default: 'int',
+      required: true,
    },
-   data() {
-      return {
-         flash: false,
-         flashTimeout: null,
+   useSum: {
+      type: Boolean,
+      default: true,
+      required: false,
+   },
+   useMax: {
+      type: Boolean,
+      default: false,
+      required: false,
+   },
+   useAvg: {
+      type: Boolean,
+      default: false,
+      required: false,
+   },
+   useFirstValue: {
+      type: Boolean,
+      default: false,
+      required: false,
+   }
+});
+
+const tooltipTextFormatted = ref(null);
+
+const value = computed(() => {
+   if (!props.piValues.pi1 || !props.piValues.pi2) {
+      return props.piValues.pi1 ?? props.piValues.pi2 ?? 0;
+   }
+
+   if (props.dataType === "int" || props.dataType === "float" || props.dataType === "percent") {
+      if (props.useMax) {
+         return Math.max(props.piValues.pi1, props.piValues.pi2);
       }
-   },
-   watch: {
-      value(newValue, oldValue) {
-         if (newValue !== oldValue) {
-            this.flash = true;
-            clearTimeout(this.flashTimeout);
-            this.flashTimeout = setTimeout(() => {
-               this.flash = false;
-            }, 500);
-         }
+      else if (props.useFirstValue) {
+         return props.piValues.pi1;
       }
-   },
+      else if (props.useAvg) {
+         return (props.piValues.pi1 + props.piValues.pi2) / 2;
+      }
+      else {
+         return props.piValues.pi1 + props.piValues.pi2;
+      }
+   } else if (props.dataType === "date") {
+      if (props.useMax) {
+         return findMaxDate(props.piValues.pi1, props.piValues.pi2);
+      }
+      else if (props.useFirstValue) {
+         return props.piValues.pi1;
+      }
+      else if (props.useAvg) {
+         return averageDates(props.piValues.pi1, props.piValues.pi2);
+      }
+      else {
+         return props.piValues.pi1 + props.piValues.pi2;
+      }
+   }
+});
+
+const formatForDataType = (val = value) => {
+   let tempValue;
+   if (typeof val === "string" || val.value === undefined) {
+      tempValue = val;
+   }
+   else if (value.value === null || value.value === undefined) {
+      tempValue = 0;
+   }
+   else {
+      tempValue = val.value;
+   }
+
+   if (props.dataType === "int" && typeof tempValue === "number") {
+      return `${Math.floor(tempValue).toLocaleString()}`;
+   } else if (props.dataType === "percent" && typeof tempValue === "number") {
+      return `${tempValue.toFixed(2)}%`;
+   } else if (props.dataType === "float" && typeof tempValue === "number") {
+      return `${tempValue.toFixed(2)}`;
+   } else if (props.dataType === "date" && typeof tempValue === "object") {
+      return formatDate(tempValue);
+   }
+   else {
+      return tempValue;
+   }
 }
+
+const boxDataValue = computed(() => {
+   return formatForDataType();
+})
+
+watch(() => props.piValues, (newVal, oldVal) => {
+   console.log('piValues updated:', newVal.pi1, newVal.pi2, (props.dataType === "percent") ? "percentage" : "");
+});
+
+const tooltipText = computed(() => {
+   if (!props.piValues.pi1 && !props.piValues.pi2) {
+      return null;
+   }
+   if (props.dataType === "date") {
+      return `Proxmox: ${formatDate(props.piValues.pi1)} RP: ${formatDate(props.piValues.pi2)}`
+   }
+   else {
+      return `Proxmox: ${(props.piValues.pi1).toLocaleString()} RP: ${(props.piValues.pi2).toLocaleString()}`
+   }
+});
+
+tooltipTextFormatted.value = tooltipText.value;
+setInterval(() => {
+   tooltipTextFormatted.value = tooltipText.value;
+}, 2000);
+
+const flash = ref(false);
+const flashTimeout = ref(null);
+
+watch(() => props.value, (newValue, oldValue) => {
+   if (newValue !== oldValue) {
+      flash.value = true;
+      clearTimeout(flashTimeout.value);
+      flashTimeout.value = setTimeout(() => {
+         flash.value = false;
+      }, 500);
+   }
+});
 </script>
 
 <style scoped>
 .inner {
    text-align: center;
+   font-family: "bender-solid";
+
+   h3 {
+      font-size: 30pt !important;
+   }
+
+   h4 {
+      font-size: 25pt !important;
+   }
+
+}
+
+@media (max-width: 768px) {
+   .col-sm-12 {
+      width: 85%;
+      margin: 0 auto;
+      padding: .25rem;
+
+      .inner {
+         display: inline-flex;
+         flex-direction: row-reverse;
+         justify-content: space-around;
+         align-items: center;
+         padding: 0;
+         margin-bottom: 0.25rem;
+         border-radius: 0.25rem;
+         text-align: center;
+         width: 100%;
+         padding: .25rem .25rem;
+         margin: .25rem, .25rem, 0, .25rem;
+         box-shadow: none;
+         border-style: none;
+
+
+         h3 {
+            font-size: 22pt !important;
+         }
+
+         h4 {
+            font-size: 16pt !important;
+            text-wrap: nowrap;
+            text-overflow: ellipsis;
+         }
+      }
+   }
 }
 
 .flash-green {

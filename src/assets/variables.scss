@@ -9,6 +9,18 @@ $odd-row-bg: rgb(23, 18, 39);
 $active-status-green: rgba(0, 200, 0, 0.75);
 $inactive-status-red: rgba(200, 0, 0, 0.75);
 
+// tooltip variables
+$tooltip-position: absolute;
+$tooltip-background-color: #333;
+$tooltip-width: 200px;
+$tooltip-color: #fff;
+$tooltip-border-radius: 5px;
+$tooltip-padding: 5px;
+$tooltip-white-space: nowrap;
+$tooltip-opacity: 0;
+$tooltip-visibility: hidden;
+$tooltip-transition: opacity 0.3s;
+
 // Mixins
 @mixin center-flex {
    display: flex;

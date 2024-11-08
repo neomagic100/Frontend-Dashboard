@@ -1,0 +1,13 @@
+@import '../variables.scss';
+
+.tooltip {
+   position: $tooltip-position;
+   background-color: $tooltip-background-color;
+   color: $tooltip-color;
+   border-radius: $tooltip-border-radius;
+   padding: $tooltip-padding;
+   white-space: $tooltip-white-space;
+   visibility: $tooltip-visibility;
+   opacity: $tooltip-opacity;
+   transition: $tooltip-transition;
+}
