@@ -35,3 +35,17 @@
    font-weight: normal;
    font-style: normal;
 }
+
+@font-face {
+   font-family: "roboto-condensed-bold";
+   src: url("./fonts/RobotoCondensed-Bold.ttf") format("truetype");
+   font-weight: bold;
+   font-style: normal;
+}
+
+@font-face {
+   font-family: "roboto-condensed";
+   src: url("./fonts/RobotoCondensed-Regular.ttf") format("truetype");
+   font-weight: normal;
+   font-style: normal;
+}

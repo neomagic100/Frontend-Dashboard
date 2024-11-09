@@ -1,10 +1,8 @@
 <template>
-   <div class="row">
-      <div class="timer-button-group col-lg-auto">
-         <button v-for="time in definedTimes" :key="time" class="btn btn-info time-button"
-            @click="disableFor(time)"><span class="time-btn-text"><strong>{{ time }}
-                  min</strong></span></button>
-      </div>
+   <div class="timer-button-group col-lg-auto">
+      <button v-for="time in definedTimes" :key="time" class="btn btn-info time-button"
+         @click="disableFor(time)"><span class="time-btn-text"><strong>{{ time }}
+               min</strong></span></button>
    </div>
 </template>
 
@@ -19,56 +17,56 @@ const disableFor = (time) => {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @import '@/assets/variables.scss';
-
-.timer-button-group {
-   display: inline-flex;
-   flex-direction: row;
-   justify-content: space-between;
-   align-items: center;
-   // border-radius: 20px;
-   // background-color: adjust-color($color: $background-color, $saturation: 10%, $lightness: 10%, $alpha: 1.0, $hue: 0) !important;
-   // box-shadow: 0 2px 4px adjust-color($color: $background-color, $saturation: 10%, $lightness: 30%, $alpha: 1.0, $hue: 0);
-   // box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-
-   padding: 10px 0;
-   margin-bottom: 25px;
-
-   .time-button {
-
-
-      .time-btn-text {
-         align-items: center;
-         justify-content: center;
-         display: flex;
-      }
-   }
-}
-
-@media (max-width: 768px) {
+@media (min-width: 768px) {
    .timer-button-group {
-      display: flex;
-
-      flex-wrap: wrap;
-      justify-content: space-around;
-      margin-left: .5rem;
-      margin-right: .5rem;
-
-
-
+      display: inline-flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      margin: 1rem .5rem 1rem .5rem;
+      width: 100%;
       .time-button {
-         width: 30%;
-         margin-top: .5rem;
-         margin-bottom: .5rem;
-         height: 3.5rem;
-
+         width: 15%;
+         margin: .5rem .3rem .5rem .3rem;
          .time-btn-text {
-            font-size: 1.5em;
+            align-items: center;
+            justify-content: center;
+            display: flex;
+            font-size: 1.6em;
+            font-family: "roboto-condensed-bold";
             text-overflow: ellipsis;
             overflow: hidden;
             white-space: nowrap;
+         
+         }
+      }
+   }
+}
+@media (max-width: 768px) {
+   .timer-button-group {
+      display: flex;
+      width: 100%;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: stretch;
+      align-items: center;
+      margin: .5rem .5rem .5rem .5rem;
+      
+      .time-button {
+         width: 30%;
+         margin: .25rem .3rem .25rem .3rem;
+         height: 3.1rem;
+         border-radius: .75rem !important;
 
+         .time-btn-text {
+            font-size: 1.4em;
+            font-family: "roboto-condensed-bold";
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
          }
       }
    }

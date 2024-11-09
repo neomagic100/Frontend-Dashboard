@@ -24,4 +24,14 @@ const props = defineProps({ title: String });
    box-shadow: 0 2px 4px adjust-color($color: $background-color, $saturation: 10%, $lightness: 30%, $alpha: 1.0, $hue: 0);
    font-family: "orbitron-bold";
 }
+
+@media (max-width: 768px) {
+   h1 {
+      width: 100%;
+      font-size: 1.5em !important;
+      padding-bottom: 0;
+      margin: 0 auto .15rem auto;
+      text-align: center;
+   }
+}
 </style>
