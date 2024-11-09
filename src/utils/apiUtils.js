@@ -6,14 +6,14 @@ import Log from "../utils/LogObject";
 
 export const wsData = ref({});
 export const wsStateRefs = ref({});
-export const socket = new WebSocket(config.ws);
+let socket = new WebSocket(config.ws);
 const API_FETCH_DATA = "fetchData";
 const API_SEND_DISABLE = "disable";
 const API_SEND_ENABLE = "enable";
 const API_GET_LOGS = "getLogs"; 
 const RETRY_INTERVAL = 5000; // ms
-const RETRY_LIMIT = 5;
-let retryCount = 0;
+const RETRY_LIMIT = 6;
+let retryCount = 1;
 
 export const openSocket = () => {
    socket.onopen = () => {
@@ -23,23 +23,13 @@ export const openSocket = () => {
    socket.onclose = () => {
       console.error("websocket disconnected");
       console.log(`reconnecting... (attempt ${retryCount})`);
-      retryCount++;
-      openSocket();
-      while (retryCount++ < RETRY_LIMIT) {
-         console.log(`reconnecting... (attempt ${retryCount})`);
-         setTimeout(openSocket, RETRY_INTERVAL);
-      }
 
       if (retryCount < RETRY_LIMIT) {
-         retryCount = 0;
-      }
-
-      if (retryCount >= RETRY_LIMIT) {
-         toast.error("Unable to connect to server", {
-            autoClose: 10000,
-            theme: "colored",
+         sleep(RETRY_INTERVAL).then(() => {
+            openSocket();
+            retryCount++;
          });
-      };
+      }
    }
 }
 
@@ -47,6 +37,8 @@ socket.onmessage = (event) => {
    wsData.value = JSON.parse(event.data);
    parseWSData();
 }
+
+const sleep = async (ms) => await new Promise(resolve => setTimeout(resolve, ms));
 
 const parseWSData = () => {
    if (wsData.value) {
