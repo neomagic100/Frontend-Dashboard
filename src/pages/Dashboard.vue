@@ -4,10 +4,10 @@
       <section class="content">
          <div class="container-fluid">
             <div class="pi-status">
-               <StatusBox :status="pi1Enabled" class="pi-status-box" label="Proxmox Status" />
-               <StatusBox :status="pi2Enabled" class="pi-status-box" label="Raspberry Pi Status" />
+               <StatusBox :status="piEnabled.pi1" label="Proxmox Status" />
+               <StatusBox :status="piEnabled.pi2" label="Raspberry Pi Status" />
             </div>
-            <div class="row">
+            <div class="status-boxes">
                <StatusColumnBox :piValues="dns_queries_today" dataType="int" useSum>DNS Queries Today</StatusColumnBox>
                <StatusColumnBox :piValues="ads_blocked_today" dataType="int" useSum>Ads Blocked Today</StatusColumnBox>
                <StatusColumnBox :piValues="ad_block_percentage" dataType="percent" useAvg>Ad Block Percentage
@@ -38,7 +38,7 @@ import ActionButtonGroup from '@/components/ActionButtonGroup.vue';
 import LogTable from '@/components/LogTable.vue';
 import ContentHeader from '@/components/ContentHeader.vue';
 import LogQueue from '@/utils/LogQueue';
-import { fetchData, disablePi, enablePi, notify } from '@/utils/apiUtils.js';
+import { disablePi, enablePi, notify, openSocket, wsStateRefs } from '@/utils/apiUtils.js';
 import { timeStorageKey } from '@/utils/eventUtils';
 
 const dns_queries_today = ref({ pi1: 0, pi2: 0 });
@@ -46,8 +46,7 @@ const ads_blocked_today = ref({ pi1: 0, pi2: 0 });
 const ad_block_percentage = ref({ pi1: 0.0, pi2: 0.0 });
 const domains_blocked = ref({ pi1: 0, pi2: 0 });
 const gravity_last_updated = ref([{ pi1: { days: 0, hours: 0, minutes: 0 }, pi2: { days: 0, hours: 0, minutes: 0 } }]);
-const pi1Enabled = ref(false);
-const pi2Enabled = ref(false);
+const piEnabled=ref({pi1: false, pi2: false});
 const disableMinutes = ref(60);
 const remainingTime = ref(0);
 const logObjs = ref(new LogQueue());
@@ -66,23 +65,20 @@ const formattedTime = computed(() => {
 const disabledSelected = ref(false);
 const cookie = useCookies(['locale']);
 
-
-
 // Lifecycle hooks
 onMounted(() => {
-   fetchData({
-      dns_queries_today: dns_queries_today.value,
-      ads_blocked_today: ads_blocked_today.value,
-      ad_block_percentage: ad_block_percentage.value,
-      domains_blocked: domains_blocked.value,
-      gravity_last_updated: gravity_last_updated.value, pi1Enabled, pi2Enabled, logObjs
-   }).then(setInterval(() => fetchData({
-      dns_queries_today: dns_queries_today.value,
-      ads_blocked_today: ads_blocked_today.value,
-      ad_block_percentage: ad_block_percentage.value,
-      domains_blocked: domains_blocked.value,
-      gravity_last_updated: gravity_last_updated.value, pi1Enabled, pi2Enabled, logObjs
-   }), 2000))
+   wsStateRefs.value =
+   {
+      dns_queries_today,
+      ads_blocked_today,
+      ad_block_percentage,
+      domains_blocked,
+      gravity_last_updated,
+      piEnabled,
+      logObjs
+   };
+
+   openSocket();
 
    if (getTimeFromLocalStorage() !== null) {
       const disableTime = getTimeFromLocalStorage();
@@ -239,74 +235,40 @@ function getTimeFromLocalStorage(raw = true) {
 <style lang="scss">
 @import '@/assets/variables.scss';
 
+.pi-status {
+   display: flex;
+   flex-direction: row;
+   justify-content: space-between;
+   margin: auto 5% .5rem 5%;
+}
+
 body {
    background-color: $background-color !important;
 }
 
-h1.m-0 {
-   color: white;
+.Toastify {
+   animation-duration: 1000ms !important;
+   opacity: 0.75 !important;
 }
 
-
-.pi-status {
-   display: flex;
-   flex-direction: row;
-   justify-content: space-around;
-   align-items: center;
-   padding: .25rem 0;
-   margin-bottom: 0.5rem;
-   border-radius: 0.25rem;
-
-
-   .pi-status-box {
+@media (min-width: 768px) {
+   .status-boxes {
       display: flex;
-      flex-direction: column;
+      flex-direction: row row-reverse;
+      flex-wrap: wrap;
       justify-content: space-between;
-      align-items: center;
-      padding: .75rem 5rem;
-      margin-bottom: 5px;
-      border-radius: 20px;
-      box-shadow: 0 3px 3px rgba(10, 200, 75);
-      border-style: bevel;
+      margin: auto 5% .5rem 5%;
+      
    }
 }
 
 @media (max-width: 768px) {
-   .row {
+   .status-boxes {
       display: flex;
       flex-direction: column;
-
-      justify-content: space-around;
-
-      align-items: center;
-      padding: 0;
-      margin-bottom: 0.25rem;
-      border-radius: 0.25rem;
-      width: 100%;
-   }
-
-   .pi-status {
-      display: flex;
-      flex-direction: row;
-      justify-content: space-around;
-      align-items: center;
-      padding: 0;
-      margin-bottom: 0.25rem;
-      border-radius: 0.25rem;
-
-      .pi-status-box {
-         width: 100%;
-         padding: .25rem .25rem;
-         margin: .25rem, .25rem, 0, .25rem;
-         box-shadow: none;
-         border-style: none;
-
-      }
-   }
-
-   .Toastify {
-      animation-duration: 1000ms !important;
-      opacity: 0.75 !important;
+      justify-content: space-between;
+      margin: auto .25rem 0 .25rem !important;
    }
 }
+
 </style>
