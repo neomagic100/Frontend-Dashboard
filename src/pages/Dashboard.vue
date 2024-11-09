@@ -4,8 +4,8 @@
       <section class="content">
          <div class="container-fluid">
             <div class="pi-status">
-               <StatusBox :status="pi1Enabled" label="Proxmox Status" />
-               <StatusBox :status="pi2Enabled" label="Raspberry Pi Status" />
+               <StatusBox :status="piEnabled.pi1" label="Proxmox Status" />
+               <StatusBox :status="piEnabled.pi2" label="Raspberry Pi Status" />
             </div>
             <div class="status-boxes">
                <StatusColumnBox :piValues="dns_queries_today" dataType="int" useSum>DNS Queries Today</StatusColumnBox>
@@ -38,7 +38,7 @@ import ActionButtonGroup from '@/components/ActionButtonGroup.vue';
 import LogTable from '@/components/LogTable.vue';
 import ContentHeader from '@/components/ContentHeader.vue';
 import LogQueue from '@/utils/LogQueue';
-import { fetchData, disablePi, enablePi, notify } from '@/utils/apiUtils.js';
+import { disablePi, enablePi, notify, openSocket, wsStateRefs } from '@/utils/apiUtils.js';
 import { timeStorageKey } from '@/utils/eventUtils';
 
 const dns_queries_today = ref({ pi1: 0, pi2: 0 });
@@ -46,8 +46,7 @@ const ads_blocked_today = ref({ pi1: 0, pi2: 0 });
 const ad_block_percentage = ref({ pi1: 0.0, pi2: 0.0 });
 const domains_blocked = ref({ pi1: 0, pi2: 0 });
 const gravity_last_updated = ref([{ pi1: { days: 0, hours: 0, minutes: 0 }, pi2: { days: 0, hours: 0, minutes: 0 } }]);
-const pi1Enabled = ref(false);
-const pi2Enabled = ref(false);
+const piEnabled=ref({pi1: false, pi2: false});
 const disableMinutes = ref(60);
 const remainingTime = ref(0);
 const logObjs = ref(new LogQueue());
@@ -66,23 +65,20 @@ const formattedTime = computed(() => {
 const disabledSelected = ref(false);
 const cookie = useCookies(['locale']);
 
-
-
 // Lifecycle hooks
 onMounted(() => {
-   fetchData({
-      dns_queries_today: dns_queries_today.value,
-      ads_blocked_today: ads_blocked_today.value,
-      ad_block_percentage: ad_block_percentage.value,
-      domains_blocked: domains_blocked.value,
-      gravity_last_updated: gravity_last_updated.value, pi1Enabled, pi2Enabled, logObjs
-   }).then(setInterval(() => fetchData({
-      dns_queries_today: dns_queries_today.value,
-      ads_blocked_today: ads_blocked_today.value,
-      ad_block_percentage: ad_block_percentage.value,
-      domains_blocked: domains_blocked.value,
-      gravity_last_updated: gravity_last_updated.value, pi1Enabled, pi2Enabled, logObjs
-   }), 2000))
+   wsStateRefs.value =
+   {
+      dns_queries_today,
+      ads_blocked_today,
+      ad_block_percentage,
+      domains_blocked,
+      gravity_last_updated,
+      piEnabled,
+      logObjs
+   };
+
+   openSocket();
 
    if (getTimeFromLocalStorage() !== null) {
       const disableTime = getTimeFromLocalStorage();
