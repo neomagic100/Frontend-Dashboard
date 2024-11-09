@@ -4,10 +4,10 @@
       <section class="content">
          <div class="container-fluid">
             <div class="pi-status">
-               <StatusBox :status="pi1Enabled" class="pi-status-box" label="Proxmox Status" />
-               <StatusBox :status="pi2Enabled" class="pi-status-box" label="Raspberry Pi Status" />
+               <StatusBox :status="pi1Enabled" label="Proxmox Status" />
+               <StatusBox :status="pi2Enabled" label="Raspberry Pi Status" />
             </div>
-            <div class="row">
+            <div class="status-boxes">
                <StatusColumnBox :piValues="dns_queries_today" dataType="int" useSum>DNS Queries Today</StatusColumnBox>
                <StatusColumnBox :piValues="ads_blocked_today" dataType="int" useSum>Ads Blocked Today</StatusColumnBox>
                <StatusColumnBox :piValues="ad_block_percentage" dataType="percent" useAvg>Ad Block Percentage
@@ -239,74 +239,40 @@ function getTimeFromLocalStorage(raw = true) {
 <style lang="scss">
 @import '@/assets/variables.scss';
 
+.pi-status {
+   display: flex;
+   flex-direction: row;
+   justify-content: space-between;
+   margin: auto 5% .5rem 5%;
+}
+
 body {
    background-color: $background-color !important;
 }
 
-h1.m-0 {
-   color: white;
+.Toastify {
+   animation-duration: 1000ms !important;
+   opacity: 0.75 !important;
 }
 
-
-.pi-status {
-   display: flex;
-   flex-direction: row;
-   justify-content: space-around;
-   align-items: center;
-   padding: .25rem 0;
-   margin-bottom: 0.5rem;
-   border-radius: 0.25rem;
-
-
-   .pi-status-box {
+@media (min-width: 768px) {
+   .status-boxes {
       display: flex;
-      flex-direction: column;
+      flex-direction: row row-reverse;
+      flex-wrap: wrap;
       justify-content: space-between;
-      align-items: center;
-      padding: .75rem 5rem;
-      margin-bottom: 5px;
-      border-radius: 20px;
-      box-shadow: 0 3px 3px rgba(10, 200, 75);
-      border-style: bevel;
+      margin: auto 5% .5rem 5%;
+      
    }
 }
 
 @media (max-width: 768px) {
-   .row {
+   .status-boxes {
       display: flex;
       flex-direction: column;
-
-      justify-content: space-around;
-
-      align-items: center;
-      padding: 0;
-      margin-bottom: 0.25rem;
-      border-radius: 0.25rem;
-      width: 100%;
-   }
-
-   .pi-status {
-      display: flex;
-      flex-direction: row;
-      justify-content: space-around;
-      align-items: center;
-      padding: 0;
-      margin-bottom: 0.25rem;
-      border-radius: 0.25rem;
-
-      .pi-status-box {
-         width: 100%;
-         padding: .25rem .25rem;
-         margin: .25rem, .25rem, 0, .25rem;
-         box-shadow: none;
-         border-style: none;
-
-      }
-   }
-
-   .Toastify {
-      animation-duration: 1000ms !important;
-      opacity: 0.75 !important;
+      justify-content: space-between;
+      margin: auto .25rem 0 .25rem !important;
    }
 }
+
 </style>

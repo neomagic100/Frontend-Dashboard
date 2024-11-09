@@ -1,17 +1,16 @@
 <template>
    <div v-if="tooltipText"
       v-tooltip="(props.dataType !== 'date') ? tooltipText : `Proxmox: ${formatDate(props.piValues.pi1)} RP: ${formatDate(props.piValues.pi2)}` || 'Loading...'"
-      class="col-lg-3 col-md-6 col-sm-12">
-      <!-- small box -->
-      <div class="small-box bg-info">
-         <div class="inner">
-            <h3 :class="{ 'flash-green': flash }">
-               {{ boxDataValue }}
-            </h3>
-            <h4>
-               <slot></slot>
-            </h4>
-         </div>
+      class="status-column-box bg-info">
+      <div class = "column column-right">
+         <span class="status-box-data" :class="{ 'flash-green': flash }">
+            {{ boxDataValue }}
+         </span>
+      </div>
+      <div class = "column column-left">
+         <span class="status-box-title">
+            <slot></slot>
+         </span>
       </div>
    </div>
 </template>
@@ -159,52 +158,73 @@ watch(() => props.value, (newValue, oldValue) => {
 });
 </script>
 
-<style scoped>
-.inner {
-   text-align: center;
-   font-family: "bender-solid";
+<style lang="scss" scoped>
+@import '@/assets/variables.scss';
+@import '@/assets/fonts.scss';
 
-   h3 {
-      font-size: 30pt !important;
+@media (min-width: 768px) {
+   .status-column-box {
+      display: flex;
+      width: 40%;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0.5rem;
+      margin: 0.5rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      border-style: none;
+      border-radius: 10px;
+      text-wrap: nowrap;
+   }
+   .status-box-title {
+      text-align: center;
+      font-size: 20pt;
+      font-weight: bold;
+      font-family: "bender-solid";
+      padding: 0.5rem;
    }
 
-   h4 {
-      font-size: 25pt !important;
+   .status-box-data {
+      text-align: center;
+      font-size: 30pt;
+      font-weight: bold;
+      font-family: "roboto-condensed-bold";
+      padding: 0.5rem;
    }
-
 }
-
 @media (max-width: 768px) {
-   .col-sm-12 {
-      width: 85%;
-      margin: 0 auto;
-      padding: .25rem;
+   .status-column-box {
+      display: flex;
+      flex-direction: row-reverse;
+      width: 100%;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0rem;
+      padding-left: .5rem;
+      padding-right: .5rem;
+      margin: .1rem .25rem;
+      border-style: none;
+      border-radius: .5rem;
+      text-wrap: nowrap;
+      
+      .column {
+         display: flex;
+         margin: .1rem;
+         flex-direction: column;
+      }
 
-      .inner {
-         display: inline-flex;
-         flex-direction: row-reverse;
-         justify-content: space-around;
-         align-items: center;
-         padding: 0;
-         margin-bottom: 0.25rem;
-         border-radius: 0.25rem;
+      .status-box-title {
          text-align: center;
-         width: 100%;
-         padding: .25rem .25rem;
-         margin: .25rem, .25rem, 0, .25rem;
-         box-shadow: none;
-         border-style: none;
+         font-size: 1.2em;
+         font-family: "bender-solid";
+         font-weight: 100;
+      }
 
-
-         h3 {
-            font-size: 22pt !important;
-         }
-
-         h4 {
-            font-size: 16pt !important;
-            text-wrap: nowrap;
-            text-overflow: ellipsis;
-         }
+      .status-box-data {
+         text-align: center;
+         font-size: 1.3em;
+         font-family: "roboto-condensed-bold";
+         font-weight: 900;
       }
    }
 }
