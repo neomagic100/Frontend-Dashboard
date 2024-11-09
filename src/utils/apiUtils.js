@@ -78,24 +78,15 @@ const parseFetchedData = () => {
 }
 
 const parseFetchedLogs = () => {
-   if (!wsData.value || !wsData.value.data || (!wsData.value.data.pi1 && !wsData.value.data.pi2)) {
+   if (!wsData.value || !wsData.value.data) {
       return;
    }
    
    const { logObjs } = wsStateRefs.value;
 
-   if (wsData.value.data.pi1) {
-      for (let item of wsData.value.data.pi1.data) {
-         item.push("Proxmox");
-         let log = new Log(item);
-         logObjs.enqueue(log);
-      }
-   }
-
-   if (wsData.value.data.pi2) {
-      for (let item of wsData.value.data.pi2.data) {
-         item.push("RP");
-         let log = new Log(item);
+   if (wsData.value.data) {
+      for (const item of wsData.value.data) {
+         const log = new Log(item);
          logObjs.enqueue(log);
       }
    }
