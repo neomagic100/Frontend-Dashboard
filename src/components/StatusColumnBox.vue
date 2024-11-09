@@ -166,6 +166,7 @@ watch(() => props.value, (newValue, oldValue) => {
    .status-column-box {
       display: flex;
       width: 40%;
+      min-width: 500px;
       flex-direction: row;
       justify-content: space-between;
       align-items: center;
