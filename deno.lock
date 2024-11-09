@@ -10,6 +10,7 @@
     "npm:pocketbase@~0.21.5": "0.21.5",
     "npm:sass@^1.80.4": "1.80.6",
     "npm:universal-cookie@^7.2.2": "7.2.2",
+    "npm:vite@^5.4.10": "5.4.10_sass@1.80.6",
     "npm:vue-facing-decorator@^3.0.4": "3.0.4_vue@3.5.12",
     "npm:vue3-toastify@~0.2.3": "0.2.4_vue@3.5.12",
     "npm:vue@^3.5.12": "3.5.12"
@@ -563,6 +564,7 @@
         "npm:pocketbase@~0.21.5",
         "npm:sass@^1.80.4",
         "npm:universal-cookie@^7.2.2",
+        "npm:vite@^5.4.10",
         "npm:vue-facing-decorator@^3.0.4",
         "npm:vue3-toastify@~0.2.3",
         "npm:vue@^3.5.12"
