@@ -1,12 +1,12 @@
 import { ref } from "vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
-import config from "../config/config.json";
-import Log from "../utils/LogObject";
+import config from "../config/config.json" with { type: "json" };
+import Log from "./LogObject.js";
 
 export const wsData = ref({});
 export const wsStateRefs = ref({});
-let socket = new WebSocket(config.ws);
+const socket = new WebSocket(config.ws);
 const API_FETCH_DATA = "fetchData";
 const API_SEND_DISABLE = "disable";
 const API_SEND_ENABLE = "enable";
