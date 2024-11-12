@@ -4,9 +4,9 @@
       <table class="table-bordered">
          <thead>
             <tr>
-               <th>Time</th>
+               <th class="fixed-width-12percent">Time</th>
                <th class="hide-small">Query Type</th>
-               <th>Domain Queried</th>
+               <th class="variable-width-20percent">Domain Queried</th>
                <th>Handled By</th>
                <th class="hide-small">Origin Client</th>
                <th>Status</th>
@@ -18,10 +18,10 @@
                <td colspan="7">No logs</td>
             </tr>
             <tr v-for="log in logArray" :key="log.id">
-               <td>{{ log.time }}</td>
+               <td class="fixed-width-12percent">{{ log.time }}</td>
                <td class="hide-small">{{ log.queryType }}</td>
-               <td
-                  :style="{ color: (log.actionTaken === 'Blocked' && log.status.includes('Blocked')) ? 'red' : 'inherit' }">
+               <td class="variable-width-20percent"
+                  :style=" { color: (log.actionTaken==='Blocked' && log.status.includes('Blocked')) ? 'red' : 'inherit'}">
                   {{ log.domainQueried }}</td>
                <a :href="(log.handledBy === 'Proxmox') ? config.url : config.url2">
                   <td>{{ log.handledBy }}</td>
@@ -118,6 +118,20 @@ table {
                text-decoration: none;
             }
          }
+      }
+
+      .fixed-width-12percent {
+         width:12%;
+      }
+
+      .fixed-width-20percent {
+         width: 20%;
+      }
+
+      .variable-width-20percent {
+         min-width: 15%;
+         width: 20%;
+         max-width: 25%;
       }
    }
 }

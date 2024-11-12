@@ -1,7 +1,7 @@
 <template>
    <div class="statusBox" :class="[{ 'statusBox--active': status }]" :style="{ backgroundColor: statusColor }">
       <h4 class="status-text">{{ label }}</h4> 
-      <h4 class="status-text"><strong class="current-status-text">{{ status ? 'Up' : 'Down' }}</strong></h4>
+      <h4 class="status-text"><strong class="current-status-text">{{ status ? 'Up' : (status == false) ? 'Down': 'Unknown' }}</strong></h4>
    </div>
 </template>
 
@@ -9,7 +9,13 @@
 import { computed, defineProps } from 'vue';
 
 const props = defineProps({ status: Boolean, label: String });
-const statusColor = computed(() => (props.status ? 'darken(rgba(0, 200, 0, 0.75), 5%)' : 'darken(rgba(200, 0, 0, 0.75), 5%)'));
+const statusColor = computed(() => {
+   if (props.status == null) return 'darken(slategray, 5%)';
+   else if (props.status) return 'darken(rgba(0, 200, 0, 0.75), 5%)';
+   else if (props.status == false) return 'darken(rgba(200, 0, 0, 0.75), 5%)'
+   else return 'darken(slategray, 5%)';
+});
+
 </script>
 
 <style lang="scss" scoped>

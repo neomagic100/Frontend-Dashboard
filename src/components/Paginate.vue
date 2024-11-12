@@ -1,0 +1,36 @@
+<template>
+   <div class="row">
+      <div class="col-sm-5">
+         <div class="dataTables_info" id="all-queries_info" role="status" aria-live="polite">Showing 1 to 10 of 100
+            entries</div>
+      </div>
+      <div class="col-sm-7">
+         <div class="dataTables_paginate paging_simple_numbers">
+            <ul class="pagination">
+               <li class="paginate_button previous disabled"><a href="#" aria-controls="all-queries" data-dt-idx="0"
+                     tabindex="0">Previous</a></li>
+               <li class="paginate_button active"><a href="#" aria-controls="all-queries" data-dt-idx="1"
+                     tabindex="0">1</a></li>
+               <li class="paginate_button "><a href="#" aria-controls="all-queries" data-dt-idx="2" tabindex="0">2</a>
+               </li>
+               <li class="paginate_button "><a href="#" aria-controls="all-queries" data-dt-idx="3" tabindex="0">3</a>
+               </li>
+               <li class="paginate_button "><a href="#" aria-controls="all-queries" data-dt-idx="4" tabindex="0">4</a>
+               </li>
+               <li class="paginate_button "><a href="#" aria-controls="all-queries" data-dt-idx="5" tabindex="0">5</a>
+               </li>
+               <li class="paginate_button disabled"><a href="#" aria-controls="all-queries" data-dt-idx="6"
+                     tabindex="0">…</a></li>
+               <li class="paginate_button "><a href="#" aria-controls="all-queries" data-dt-idx="7" tabindex="0">10</a>
+               </li>
+               <li class="paginate_button next"><a href="#" aria-controls="all-queries" data-dt-idx="8"
+                     tabindex="0">Next</a></li>
+            </ul>
+         </div>
+      </div>
+   </div>
+</template>
+
+<script setup>
+const x = "placeholder";
+</script>
