@@ -83,17 +83,18 @@ const parseFetchedLogs = () => {
    }
    
    const { logObjs } = wsStateRefs.value;
+   const currentLog = logObjs;
 
    if (wsData.value.data) {
       for (const item of wsData.value.data) {
          const log = new Log(item);
-         logObjs.enqueue(log);
+         currentLog.enqueue(log);
       }
    }
 
-   if (logObjs.queue.length > 0) {
-      logObjs.sortQueue();
-   }
+   // if (logObjs.queue.length > 0) {
+   //    logObjs.sortQueue();
+   // }
 }
 
 // Enable and disable functions

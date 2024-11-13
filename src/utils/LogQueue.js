@@ -1,178 +1,68 @@
-import Log from "./LogObject";
+const DEFAULT_MAX_LOGS = 100;
 
 export default class LogQueue extends Array {
-   /**
-    * Initialize a new instance of LogQueue.
-    *
-    * @param {Array} arr - An initial array to populate the queue. Defaults to an empty array.
-    * @param {number} maxSize - The maximum size of the queue. Defaults to 30.
-    */
-   constructor(arr = [], maxSize = 30) {
+   constructor(arr = [], maxSize = DEFAULT_MAX_LOGS, paginate = false, numPages = 1) {
       super();
-      if (arr === null) {
-         throw new Error("arr cannot be null");
-      }
-      if (maxSize < 1) {
-         throw new Error("maxSize must be a positive number");
-      }
-
-      this.queue = arr;
-      this.queueSize = this.queue.length;
+      if (!Array.isArray(arr)) arr = [];
+      this.push(...arr);
       this.maxSize = maxSize;
+      this.isPaginated = paginate;
+      this.numPages = numPages;
+      this.currentPage = 1;
+      this.perPage = Math.ceil(this.length / this.numPages);
+      if (this.isPaginated) {
+         this.prepareTable();
+      }
    }
 
-   /**
-    * Add an item to the front of the queue.
-    *
-    * If the queue is at its maximum size, this will remove the last item
-    * before adding the new one at the front.
-    *
-    * @param {Log} item - The item to add to the queue.
-    */
    enqueue(log) {
-      if (this.queue.length >= 30) {
+      if (this.length === 0) {
+         this.push(log);
+         return;
+      }
+      if (this.length >= this.maxSize) {
          this.dequeue();
       }
-      let logTime = new Date(log.time);
+      const logTime = new Date(log.time);
       let idx = 0;
-      while (idx < this.queue.length && this.queue[idx].time > logTime) {
+      while (idx < this.length && new Date(this[idx].time) > logTime) {
          idx++;
       }
-      this.queue.splice(idx, 0, log);
-      this.queueSize++;
+      this.splice(idx, 0, log);
+      if (this.isPaginated) {
+         this.prepareTable();
+      }
    }
-   /**
-    * Remove the item at the front of the queue and return it.
-    *
-    * If the queue is empty, this will return null.
-    *
-    * @return {any|null} The item at the front of the queue, or null if the
-    *  queue is empty.
-    */
-   dequeue() {
-      if (this.queue.length === 0) {
+
+   enqueueAll(logs) {
+      for (const log of logs) {
+         this.enqueue(log);
+      }
+   }
+
+   dequeue(numToRemove = 1) {
+      if (this.length <= 0) {
          return null;
+      } else {
+         const removed = this.splice(this.length - numToRemove, numToRemove);
+         if (this.isPaginated) {
+            this.prepareTable();
+         }
+         return removed;
       }
-      this.queueSize--;
-      return this.queue.pop();
    }
 
-   sortQueue() {
-      this.queue.sort((a, b) => {
-         let time1 = new Date(a.time);
-         let time2 = new Date(b.time);
-         return time2 - time1;
-      });
-   }
-
-   /**
-    * Merges the current queue with another queue, maintaining sorted order.
-    *
-    * The resulting merged queue will replace the current queue, and any 
-    * excess elements beyond the maximum size will be removed.
-    *
-    * @param {LogQueue} queue - The queue to merge with the current queue.
-    */
    mergeQueues(queue) {
-      let idx1 = 0, idx2 = 0;
-      let queueSize1 = this.queue.length, queueSize2 = queue.queue.length;
-      let mergedQueue = new LogQueue();
-      while (idx1 < queueSize1 && idx2 < queueSize2) {
-         let item1 = new Log(this.queue[idx1]);
-         let item2 = new Log(queue.queue[idx2]);
-         let time1 = new Date(item1.time);
-         let time2 = new Date(item2.time);
-         if (time1 < time2) {
-            mergedQueue.enqueue(this.queue[idx1]);
-            idx1++;
-         } else {
-            mergedQueue.enqueue(queue.queue[idx2]);
-            idx2++;
-         }
-      }
-      while (idx1 < queueSize1) {
-         mergedQueue.enqueue(this.queue[idx1]);
-         idx1++;
-      }
-      while (idx2 < queueSize2) {
-         mergedQueue.enqueue(queue.queue[idx2]);
-         idx2++;
-      }
-
-      while (mergedQueue.queue.length > 30) {
-            let item = mergedQueue.dequeue();
-         }
-      
-      this.queue = mergedQueue.queue;
-      this.queueSize = mergedQueue.queue.length;
+      this.enqueueAll(queue);
    }
 
-      /**
-       * Return the item at the front of the queue without removing it.
-       *
-       * If the queue is empty, this will return null.
-       *
-       * @return {any|null} The item at the front of the queue, or null if the
-       *  queue is empty.
-       */
-      peek() {
-         if (this.queueSize === 0) {
-            return null;
-         }
-         return this.queue[0];
-      }
-
-      /**
-       * Return the number of items in the queue.
-       *
-       * @return {number} The number of items in the queue.
-       */
-      size() {
-         return this.queueSize;
-      }
-
-      /**
-       * Return the maximum size of the queue.
-       *
-       * @return {number} The maximum size of the queue.
-       */
-      maxSize() {
-         return this.maxSize;
-      }
-
-      /**
-       * Clear the queue.
-       */
-      clear() {
-         this.queue = [];
-         this.queueSize = 0;
-      }
-
-      /**
-       * Return the queue as an array.
-       *
-       * @return {Array} The queue as an array.
-       */
-      toArray() {
-         return this.queue;
-      }
-
-      /**
-       * Return the queue as a string.
-       *
-       * @return {string} The queue as a string.
-       */
-      toString() {
-         return this.queue.toString();
-      }
-
-      /**
-       * Return the queue as a JSON string.
-       *
-       * @return {string} The queue as a JSON string.
-       */
-      toJSON() {
-         return this.queue;
-      }
-
+   maxSize() {
+      return this.maxSize;
    }
+
+   prepareTable() {
+      this.currentPage = Math.min(this.currentPage, this.numPages);
+      this.perPage = Math.ceil(this.length / this.numPages);
+   }
+}
+
