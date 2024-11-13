@@ -1,5 +1,5 @@
 <template>
-   <div class="statusBox" :class="[{ 'statusBox--active': status }]" :style="{ backgroundColor: statusColor }">
+   <div class="statusBox" :class="[{ 'statusBox--active': status }]" :style="{ backgroundColor: statusColor || 'darken(slategray, 5%)' }">
       <h4 class="status-text">{{ label }}</h4> 
       <h4 class="status-text"><strong class="current-status-text">{{ status ? 'Up' : (status == false) ? 'Down': 'Unknown' }}</strong></h4>
    </div>
@@ -10,7 +10,7 @@ import { computed, defineProps } from 'vue';
 
 const props = defineProps({ status: Boolean, label: String });
 const statusColor = computed(() => {
-   if (props.status == null) return 'darken(slategray, 5%)';
+   if (props.status == null || props.status == undefined) return 'darken(slategray, 5%)';
    else if (props.status) return 'darken(rgba(0, 200, 0, 0.75), 5%)';
    else if (props.status == false) return 'darken(rgba(200, 0, 0, 0.75), 5%)'
    else return 'darken(slategray, 5%)';
@@ -66,22 +66,28 @@ const statusColor = computed(() => {
    .statusBox {
       display: flex;
       flex-direction: row;
-      padding: .1rem .1rem .1rem .1rem;
+      padding: .25rem .1rem .25rem .1rem;
       margin: 0 .15rem 0 .15rem;
       border-radius: 1rem;
       width: 50%;
+      height: 2.9rem;
+      // text-wrap: nowrap;
       .status-text {
          display: inline-flex;
          align-items: center;
-         font-size: 1.3em;
+         font-size: 1.2em;
+         overflow: hidden;
          text-overflow: ellipsis;
+         white-space: nowrap;
+         padding: 0.2rem;
 
          strong {
             font-size: 1em;
             text-decoration: underline;
-            text-overflow: ellipsis;
+            padding: 0.2rem;
          }
    }
 }
 }
 </style>
+
