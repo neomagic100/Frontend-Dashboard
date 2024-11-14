@@ -37,27 +37,9 @@
                   <td class="action-taken-column hide-small">{{ log.actionTaken }}</td>
                </tr>
             </tbody>
-            <!-- <tbody v-else>
-               <tr v-if="!pausedLogs.length">
-                  <td colspan="7">No logs</td>
-               </tr>
-               <tr v-for="log in pausedLogs" :key="log.id">
-                  <td class="time-column">{{ log.time }}</td>
-                  <td class="query-type-column">{{ log.queryType }}</td>
-                  <td class="domain-queried-column"
-                     :style=" { color: (log.actionTaken==='Blocked' && log.status.includes('Blocked')) ? 'red' : 'inherit'}">
-                     {{ log.domainQueried }}</td>
-                  <a :href="(log.handledBy === 'Proxmox') ? config.url : config.url2">
-                     <td class="handled-by-column">{{ log.handledBy }}</td>
-                  </a>
-                  <td class="origin-client-column hide-small">{{ log.originClient }}</td>
-                  <td class="status-column">{{ log.status }}</td>
-                  <td class="action-taken-column hide-small">{{ log.actionTaken }}</td>
-               </tr>
-            </tbody> -->
          </table>
       </section>
-      <PaginateSelect :key="currentPage" :items-per-page="perPage" :total-items="logArray.length"
+      <PaginateSelect class="paginate-select" :key="currentPage" :items-per-page="perPage" :total-items="logArray.length"
          :currentPage="currentPage" @change-page="updateChangePage" />
 
    </div>
@@ -230,6 +212,10 @@ table {
    }
 }
 
+.paginate-select {
+   margin-top: 1rem;
+}
+
 .pause-button {
    background-color: darkslategray;
    color: white;
@@ -252,6 +238,14 @@ table {
       left: 0;
       width: 100%;
       z-index: 1;
+   }
+
+   .pause-button {
+      position: sticky !important;
+      top: 0;
+      right: 0;
+      z-index: 1;
+      
    }
 
    .table-responsive {

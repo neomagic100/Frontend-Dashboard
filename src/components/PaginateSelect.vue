@@ -1,5 +1,5 @@
 <template>
-   <nav aria-label="Page navigation example">
+   <nav aria-label="Pagination Select">
       <ul class="pagination justify-content-center">
          <li class="page-item" v-for="page in pages" :key="page">
             <a class="page-link" href="#log-table" @click="changePage(page)" :class="{ active: page === currentPage }">{{ page
@@ -38,3 +38,35 @@ const pages = computed(() => {
    return Array.from({ length: totalPages }, (_, i) => i + 1);
 });
 </script>
+
+<style scoped>
+   .page-item {
+      display: inline-flex;
+      width: 35px;
+      align-items: center;
+      justify-content: space-evenly;
+   }
+
+   .page-link {
+      cursor: pointer;
+      color: white;
+      font-family: 'orbitron-bold';
+      font-size: 1em;
+      background-color: darkslategray;
+
+      &:hover {
+         border: 2px groove dodgerblue;
+         &:not(.active) {
+            background-color: darken(darkslategray, 30%);
+            color: aliceblue;  
+         }
+      }
+      
+
+      &.active {
+         background-color: dodgerblue;
+         color: white;
+         border: 1px solid white;
+      }
+   }
+</style>
