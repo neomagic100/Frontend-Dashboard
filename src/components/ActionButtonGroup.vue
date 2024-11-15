@@ -34,10 +34,10 @@ const props = defineProps({
    isDisabled: Boolean,
    disableNow: Function,
    enableNow: Function,
-   disableNowByTimer: Function
+
 });
 
-const emits = defineEmits(['update:disableMinutes', 'disableNow', 'enableNow']);
+const emits = defineEmits(['update:disableMinutes', 'disableNow', 'enableNow', 'disableNowByTimer']);
 
 const doEnableNow = () => {
    emits('enableNow');
@@ -52,12 +52,10 @@ const emitDisabledNowByTimer = () => {
 }
 
 const disableNowByTimerPreset = (time) => {
-   console.log(time);
    updateDisableMinutes(Number(time));
    emits('disableNowByTimer');
 }
 
-// Emit an update event when disableMinutes changes
 const updateDisableMinutes = (value) => {
    emits('update:disableMinutes', Number(value));
 };

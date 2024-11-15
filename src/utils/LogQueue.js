@@ -1,178 +1,129 @@
-import Log from "./LogObject";
+const DEFAULT_MAX_LOGS = 100;
 
 export default class LogQueue extends Array {
    /**
-    * Initialize a new instance of LogQueue.
+    * Creates a new LogQueue instance.
     *
-    * @param {Array} arr - An initial array to populate the queue. Defaults to an empty array.
-    * @param {number} maxSize - The maximum size of the queue. Defaults to 30.
+    * @param {array} [arr=[]] - Initial array of logs.
+    * @param {number} [maxSize=DEFAULT_MAX_LOGS] - Maximum number of logs to keep.
+    * @param {boolean} [paginate=false] - Whether to paginate the logs.
+    * @param {number} [numPages=1] - Number of pages to divide the logs into.
     */
-   constructor(arr = [], maxSize = 30) {
+   constructor(arr = [], maxSize = DEFAULT_MAX_LOGS, paginate = false, numPages = 1) {
       super();
-      if (arr === null) {
-         throw new Error("arr cannot be null");
-      }
-      if (maxSize < 1) {
-         throw new Error("maxSize must be a positive number");
-      }
-
-      this.queue = arr;
-      this.queueSize = this.queue.length;
+      if (!Array.isArray(arr)) arr = [];
+      this.push(...arr);
       this.maxSize = maxSize;
+      this.isPaginated = paginate;
+      this.numPages = numPages;
+      this.currentPage = 1;
+      this.perPage = Math.ceil(this.length / this.numPages);
+      if (this.isPaginated) {
+         this.prepareTable();
+      }
    }
 
    /**
-    * Add an item to the front of the queue.
+    * Enqueues a log into the LogQueue.
     *
-    * If the queue is at its maximum size, this will remove the last item
-    * before adding the new one at the front.
+    * @param {object} log - The log to enqueue.
     *
-    * @param {Log} item - The item to add to the queue.
+    * If the LogQueue is empty, the log is simply added to the end.
+    * If the LogQueue has reached its maximum size, the oldest log is dequeued.
+    * If the LogQueue is paginated, the logs are then re-paginated after dequeuing.
+    * The log is then added to the correct position in the LogQueue, based on its timestamp.
     */
    enqueue(log) {
-      if (this.queue.length >= 30) {
+      if (this.length === 0) {
+         this.push(log);
+         return;
+      }
+      if (this.length >= this.maxSize) {
          this.dequeue();
       }
-      let logTime = new Date(log.time);
+      const logTime = new Date(log.time);
       let idx = 0;
-      while (idx < this.queue.length && this.queue[idx].time > logTime) {
+      while (idx < this.length && new Date(this[idx].time) > logTime) {
          idx++;
       }
-      this.queue.splice(idx, 0, log);
-      this.queueSize++;
-   }
-   /**
-    * Remove the item at the front of the queue and return it.
-    *
-    * If the queue is empty, this will return null.
-    *
-    * @return {any|null} The item at the front of the queue, or null if the
-    *  queue is empty.
-    */
-   dequeue() {
-      if (this.queue.length === 0) {
-         return null;
+      this.splice(idx, 0, log);
+      if (this.isPaginated) {
+         this.prepareTable();
       }
-      this.queueSize--;
-      return this.queue.pop();
-   }
-
-   sortQueue() {
-      this.queue.sort((a, b) => {
-         let time1 = new Date(a.time);
-         let time2 = new Date(b.time);
-         return time2 - time1;
-      });
    }
 
    /**
-    * Merges the current queue with another queue, maintaining sorted order.
+    * Enqueues all logs in the given array into the LogQueue.
     *
-    * The resulting merged queue will replace the current queue, and any 
-    * excess elements beyond the maximum size will be removed.
+    * @param {Array<object>} logs - The array of logs to enqueue.
     *
-    * @param {LogQueue} queue - The queue to merge with the current queue.
+    * This method is simply a wrapper around the `enqueue` method. It iterates
+    * over the given array of logs and calls `enqueue` on each log. Useful for
+    * enqueuing an array of logs at once, such as when loading data from a
+    * database or file.
+    */
+   enqueueAll(logs) {
+      for (const log of logs) {
+         this.enqueue(log);
+      }
+   }
+
+   /**
+    * Dequeues a number of logs from the end of the LogQueue.
+    *
+    * @param {number} [numToRemove=1] - The number of logs to dequeue.
+    *
+    * If the LogQueue is empty, the method will return null.
+    * If the LogQueue is paginated, the logs are then re-paginated after dequeuing.
+    * The dequeued logs are returned as an array.
+    */
+   dequeue(numToRemove = 1) {
+      if (this.length <= 0) {
+         return null;
+      } else {
+         const removed = this.splice(this.length - numToRemove, numToRemove);
+         if (this.isPaginated) {
+            this.prepareTable();
+         }
+         return removed;
+      }
+   }
+
+   /**
+    * Merges the given LogQueue into this LogQueue.
+    *
+    * @param {LogQueue} queue - The LogQueue to merge into this LogQueue.
+    *
+    * This method is simply a wrapper around the `enqueueAll` method. It allows
+    * for easily merging two LogQueues into one. The logs in the given queue are
+    * added to the end of this LogQueue, in the order they appear in the given
+    * queue. If this LogQueue is paginated, the merged logs are then re-paginated
+    * after dequeuing.
     */
    mergeQueues(queue) {
-      let idx1 = 0, idx2 = 0;
-      let queueSize1 = this.queue.length, queueSize2 = queue.queue.length;
-      let mergedQueue = new LogQueue();
-      while (idx1 < queueSize1 && idx2 < queueSize2) {
-         let item1 = new Log(this.queue[idx1]);
-         let item2 = new Log(queue.queue[idx2]);
-         let time1 = new Date(item1.time);
-         let time2 = new Date(item2.time);
-         if (time1 < time2) {
-            mergedQueue.enqueue(this.queue[idx1]);
-            idx1++;
-         } else {
-            mergedQueue.enqueue(queue.queue[idx2]);
-            idx2++;
-         }
-      }
-      while (idx1 < queueSize1) {
-         mergedQueue.enqueue(this.queue[idx1]);
-         idx1++;
-      }
-      while (idx2 < queueSize2) {
-         mergedQueue.enqueue(queue.queue[idx2]);
-         idx2++;
-      }
-
-      while (mergedQueue.queue.length > 30) {
-            let item = mergedQueue.dequeue();
-         }
-      
-      this.queue = mergedQueue.queue;
-      this.queueSize = mergedQueue.queue.length;
+      this.enqueueAll(queue);
    }
 
-      /**
-       * Return the item at the front of the queue without removing it.
-       *
-       * If the queue is empty, this will return null.
-       *
-       * @return {any|null} The item at the front of the queue, or null if the
-       *  queue is empty.
-       */
-      peek() {
-         if (this.queueSize === 0) {
-            return null;
-         }
-         return this.queue[0];
-      }
-
-      /**
-       * Return the number of items in the queue.
-       *
-       * @return {number} The number of items in the queue.
-       */
-      size() {
-         return this.queueSize;
-      }
-
-      /**
-       * Return the maximum size of the queue.
-       *
-       * @return {number} The maximum size of the queue.
-       */
-      maxSize() {
-         return this.maxSize;
-      }
-
-      /**
-       * Clear the queue.
-       */
-      clear() {
-         this.queue = [];
-         this.queueSize = 0;
-      }
-
-      /**
-       * Return the queue as an array.
-       *
-       * @return {Array} The queue as an array.
-       */
-      toArray() {
-         return this.queue;
-      }
-
-      /**
-       * Return the queue as a string.
-       *
-       * @return {string} The queue as a string.
-       */
-      toString() {
-         return this.queue.toString();
-      }
-
-      /**
-       * Return the queue as a JSON string.
-       *
-       * @return {string} The queue as a JSON string.
-       */
-      toJSON() {
-         return this.queue;
-      }
-
+   /**
+    * Returns the maximum size of the LogQueue.
+    *
+    * @return {number} - The maximum size of the LogQueue.
+    */
+   maxSize() {
+      return this.maxSize;
    }
+
+   /**
+    * Prepares the LogQueue for pagination by recalculating the page count and
+    * items per page based on the current length of the LogQueue.
+    *
+    * This method is typically called after dequeuing or merging another LogQueue.
+    * It ensures that the LogQueue is in a valid paginated state after the
+    * operation.
+    */
+   prepareTable() {
+      this.currentPage = Math.min(this.currentPage, this.numPages);
+      this.perPage = Math.ceil(this.length / this.numPages);
+   }
+}
+

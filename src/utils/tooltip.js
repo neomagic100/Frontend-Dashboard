@@ -1,5 +1,5 @@
 import { computed } from 'vue';
-import dateHelper from '@/utils/dateHelper';
+import dateHelper from './dateHelper.js';
 const formatDate = dateHelper.formatDate;
 
 
