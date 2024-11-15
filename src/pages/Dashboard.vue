@@ -19,9 +19,9 @@
             </div>
             <div class="row">
                <ActionButtonGroup :disableMinutes="disableMinutes" :formattedTime="formattedTime"
-                  :isDisabled="isDisabled" @update:disableMinutes="disableMinutes = $event" @disableNow="disableNow"
-                  @enableNow="enableNow" :disableNow="disableNow" :enableNow="enableNow"
-                  :disableNowByTimer="disableNowByTimer" @disableNowByTimer="disableNowByTimer" />
+                  :isDisabled="!piEnabled.pi1 && !piEnabled.pi2" @update:disableMinutes="disableMinutes = $event" @disableNow="disableNow"
+                  @enableNow="enableNow" :disableNow="disableNow" :enableNow="enableNow" @disableNowByTimer="disableNowByTimer"
+            />
                <LogTable :logs="logObjs" />
             </div>
          </div>
@@ -31,15 +31,13 @@
 
 <script setup lang="js">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
-import { useCookies } from '@vueuse/integrations/useCookies';
 import StatusBox from '@/components/StatusBox.vue';
 import StatusColumnBox from '@/components/StatusColumnBox.vue';
 import ActionButtonGroup from '@/components/ActionButtonGroup.vue';
 import LogTable from '@/components/LogTable.vue';
 import ContentHeader from '@/components/ContentHeader.vue';
 import LogQueue from '@/utils/LogQueue';
-import { disablePi, enablePi, notify, openSocket, wsStateRefs } from '@/utils/apiUtils.js';
-import { timeStorageKey } from '@/utils/eventUtils';
+import { disablePi, disablePiTimer, enablePi, notify, openSocket, wsStateRefs } from '@/utils/apiUtils.js';
 
 const dns_queries_today = ref({ pi1: 0, pi2: 0 });
 const ads_blocked_today = ref({ pi1: 0, pi2: 0 });
@@ -50,11 +48,9 @@ const piEnabled=ref({pi1: null, pi2: null});
 const disableMinutes = ref(60);
 const remainingTime = ref(0);
 const logObjs = ref(new LogQueue());
-const globalTimer = { timerId: null };
 const toastTimerId = ref({ enabled: null, disabled: null });
 const toastShowing = ref({ enabled: false, disabled: false });
 // Computed properties
-const isDisabled = computed(() => remainingTime.value > 0);
 const formattedTime = computed(() => {
    const minutes = Math.floor(remainingTime.value / 60)
       .toString()
@@ -62,8 +58,7 @@ const formattedTime = computed(() => {
    const seconds = (remainingTime.value % 60).toString().padStart(2, '0');
    return `${minutes}:${seconds}`;
 })
-const disabledSelected = ref(false);
-const cookie = useCookies(['locale']);
+const disabledTimer = ref(null);
 
 // Lifecycle hooks
 onMounted(() => {
@@ -75,45 +70,18 @@ onMounted(() => {
       domains_blocked,
       gravity_last_updated,
       piEnabled,
+      disableMinutes,
       logObjs
    };
 
    openSocket();
-
-   if (getTimeFromLocalStorage() !== null) {
-      const disableTime = getTimeFromLocalStorage();
-
-      disableMinutes.value = disableTime.disableMinutes;
-      const disableUntilTime = disableTime.disableUntilTime;
-
-      remainingTime.value = Math.floor((disableUntilTime - Date.now()) / 1000) || 0;
-      if (remainingTime.value > 0) {
-         startTimer(remainingTime.value);
-      }
-      else {
-         enableNow();
-      }
-   }
-   if (disabledSelected.value) {
-      disabledSelected.value = pi1Enabled.value == true && pi2Enabled.value == true;
-   }
 });
-onUnmounted(() => clearInterval(startTimer));
 
-// Watch remainingTime to handle enableNow trigger
-watch(remainingTime, (newValue, oldValue) => {
-   if (newValue === 0 && oldValue > 0) {
-      enableNow()
-   }
-
-});
 // Action handlers
 const disableNowByTimer = () => {
-   console.log("disableNowByTimer", disableMinutes.value);
-   addTimeToLocalStorage(disableMinutes.value);
    remainingTime.value = disableMinutes.value * 60;
-   startTimer(disableMinutes.value * 60);
-   disableNow();
+   startTimer(disableMinutes.value);
+   disablePiTimer(disableMinutes.value);
 }
 
 watch(toastShowing, (newValue, oldValue) => {
@@ -125,22 +93,33 @@ watch(toastShowing, (newValue, oldValue) => {
       clearInterval(toastTimerId.disableToast);
       toastTimerId.disableToast = null;
    }
-
 });
 
-const startTimer = (duration, inSeconds = false) => {
-   const timer = setInterval(() => {
-      if (duration <= 0) {
-         enableNow();
-      } else {
-         if (inSeconds) {
-            duration /= 1000
-         }
-         remainingTime.value = duration;
-         duration -= 1;
+watch(remainingTime, (newValue, oldValue) => {
+   if (newValue <= 0 && oldValue > 0) {
+      if (disabledTimer.value) {
+         clearInterval(disabledTimer.value);
+         disabledTimer.value = null;
       }
-   }, 1000); // 1000ms = 1s
-   globalTimer.timerId = timer;
+      remainingTime.value = 0;
+   }
+})
+
+const startTimer = (duration) => { // In Minutes
+   let timeLeft = duration * 60;
+   if (disabledTimer.value) {
+      clearInterval(disabledTimer.value);
+      disabledTimer.value = null;
+   }
+   disabledTimer.value = setInterval(() => {
+      if (remainingTime.value <= 0) {
+         clearInterval(disabledTimer.value);
+         remainingTime.value = 0;
+         disabledTimer.value = null;
+      }
+      remainingTime.value = timeLeft;
+      timeLeft -= 1;
+   }, 1000);
 };
 
 const startEnableToastTimer = (duration = 5) => {
@@ -169,66 +148,17 @@ const startDisableToastTimer = (duration = 5) => {
 
 const disableNow = () => {
    disablePi();
-   disabledSelected.value = true;
    if (!toastShowing.disabled) {
       startDisableToastTimer();
    }
 };
 const enableNow = () => {
-   removeTimeFromLocalStorage();
-   disabledSelected.value = false;
    remainingTime.value = 0;
-   clearInterval(globalTimer.timerId);
    enablePi();
    if (!toastShowing.enabled) {
       startEnableToastTimer();
-
    }
 };
-
-function addTimeToLocalStorage(minutes) {
-   removeTimeFromLocalStorage();
-   console.log("store ", minutes);
-   const time = Date.now() + minutes * 60 * 1000;
-   const value = { disableUntilTime: time, disableMinutes: minutes };
-   cookie.set(timeStorageKey, JSON.stringify(value));
-   localStorage.setItem(timeStorageKey, JSON.stringify(value));
-}
-
-function removeTimeFromLocalStorage() {
-   const value = getTimeFromLocalStorage();
-   localStorage.removeItem(timeStorageKey);
-   cookie.remove(timeStorageKey);
-   if (!value) {
-      return null;
-   }
-
-   return value;
-}
-
-function getTimeFromLocalStorage(raw = true) {
-   const cookieValue = cookie.get(timeStorageKey);
-   if (!raw) {
-      const value = localStorage.getItem(timeStorageKey);
-
-      if (!value) {
-         return null;
-      }
-
-      return {
-         disableUntilTime: JSON.parse(value).disableUntilTime,
-         disableMinutes: JSON.parse(value).disableMinutes,
-      };
-   } else {
-      const value = JSON.parse(localStorage.getItem(timeStorageKey));
-
-      if (!value && cookieValue) {
-         addTimeToLocalStorage(value.disableMinutes);
-      }
-
-      return value;
-   }
-}
 
 </script>
 
