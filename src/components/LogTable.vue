@@ -26,7 +26,7 @@
                <tr v-for="log in paginatedLogs()" :key="log.id">
                   <td class="time-column">{{ log.time }}</td>
                   <td class="query-type-column">{{ log.queryType }}</td>
-                  <td class="domain-queried-column"
+                  <td class="domain-queried-column" id="domain-queried-column" v-on:click="showAddToList($event, log.domainQueried)"
                      :style=" { color: (log.actionTaken==='Blocked' && log.status.includes('Blocked')) ? 'red' : 'inherit'}">
                      {{ log.domainQueried }}</td>
                   <a :href="(log.handledBy === 'Proxmox') ? config.url : config.url2">
@@ -39,8 +39,15 @@
             </tbody>
          </table>
       </section>
-      <PaginateSelect class="paginate-select" :key="currentPage" :items-per-page="perPage" :total-items="logArray.length"
-         :currentPage="currentPage" @change-page="updateChangePage" />
+      <PaginateSelect class="paginate-select" :key="currentPage" :items-per-page="perPage"
+         :total-items="logArray.length" :currentPage="currentPage" @change-page="updateChangePage" />
+
+      <div class="popup-modal" v-if="showPopupFlag" id="popup"
+         :style="{ top: popupTop + 'px', left: popupLeft + 'px' }">
+         <h5>{{ domainToList }}</h5>
+         <button class="btn btn-warning" @click="addDomainToList('black')">Blacklist</button>
+         <button class="btn btn-warning" @click="addDomainToList('white')">Whitelist</button>
+      </div>
 
    </div>
 </template>
@@ -49,6 +56,8 @@
 import { defineProps, ref, computed, watch } from 'vue';
 import config from '../config/config.json';
 import PaginateSelect from '@/components/PaginateSelect.vue';
+import { addToList, notifyAddedToList } from '../utils/apiUtils.js'; 
+
 
 const props = defineProps({ logs: Array });
 const logArray = props.logs;
@@ -59,6 +68,57 @@ const logCount = ref(0);
 const pages = computed(() => {
    return Math.ceil(logArray.length / perPage);
 });
+const showPopupFlag = ref(false);
+const domainToList = ref('');
+const popupTop = ref(0);
+const popupLeft = ref(0);
+var clickListener = null;
+
+watch(showPopupFlag, (newValue, oldValue) => {
+   if (newValue && !oldValue) {
+      setTimeout(() => {
+         showPopupFlag.value = false;
+      }, 10 * 1000);
+   }
+})
+
+const showAddToList = ($event,domain) => {
+   let target = $event.target;
+   let top = target.offsetTop;
+   let left = target.offsetLeft;
+   while (target.offsetParent && target.offsetParent !== document.body) {
+      top += target.offsetParent.offsetTop - 100;
+      left += target.offsetParent.offsetLeft;
+      target = target.offsetParent;
+   }
+   if (window.innerWidth < 768) {
+      left -= 100;
+   }
+   else {
+      left += 100;
+   }
+
+   popupTop.value = top;
+   popupLeft.value = left;
+   domainToList.value = domain;
+   showPopupFlag.value = true;
+
+   document.addEventListener('click', (e) => {
+      console.log("e", e.target.closest('#domain-queried-column'), e)
+      if (!e.target.closest('#domain-queried-column')) {
+         showPopupFlag.value = false
+         document.removeEventListener('click', clickListener);
+      }
+   });
+
+   clickListener = document.addEventListener('click', clickListener);
+}
+
+const addDomainToList = (listType) => {
+   addToList(domainToList.value, listType);
+   showPopupFlag.value = false;
+   notifyAddedToList(domainToList.value, listType);
+}
 
 const paginatedLogs = () => {
    if (isPaused.value) {
@@ -212,8 +272,36 @@ table {
    }
 }
 
+.popup-modal {
+   position:absolute;
+   background-color: lighten($background-color, 30%);
+   color: white;
+   border: 1px solid #ddd;
+   padding: 1rem;
+   width: 20rem;
+   z-index: 1000;
+   overflow: hidden;
+   text-overflow: ellipsis;
+   white-space: nowrap;
+
+   .btn-warning {
+      // --color: inherit;
+      background-color: darken(#f1c40f, 10%);
+      color: white;
+      margin: auto 1.5rem auto 1.5rem;
+      &:hover {
+         background-color: darken(#f1c40f, 15%);
+      }
+   }
+}
+
 .paginate-select {
    margin-top: 1rem;
+}
+
+.Toastify {
+   animation-duration: 1000ms !important;
+   opacity: 0.75 !important;
 }
 
 .pause-button {

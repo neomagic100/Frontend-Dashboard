@@ -12,6 +12,7 @@ const API_SEND_DISABLE = "disable";
 const API_SEND_ENABLE = "enable";
 const API_SEND_DISABLE_MINUTES = "disableMinutes";
 const API_GET_LOGS = "getLogs"; 
+const API_ADD_TO_LIST = "addToList";
 const RETRY_INTERVAL = 5000; // ms
 const RETRY_LIMIT = 6;
 let retryCount = 1;
@@ -192,6 +193,10 @@ function togglePi(action) {
    socket.send(JSON.stringify({ command: action === "enable" ? API_SEND_ENABLE : API_SEND_DISABLE }));
 }
 
+export function addToList(domain, listType) {
+   socket.send(JSON.stringify({ command: API_ADD_TO_LIST, data: { domain, listType } }));
+}
+
 /**
  * Displays a toast notification with a message based on the status change.
  *
@@ -210,6 +215,17 @@ export function notify(statusChange) {
             : statusChange === "disabled"
             ? "warning"
             : "error",
+      pauseOnFocusLoss: false,
+      closeOnClick: true,
+      closeButton: false,
+   });
+}
+
+export function notifyAddedToList(domain, listType) {
+   const message = `Added ${domain} to ${listType.charAt(0).toUpperCase() + listType.slice(1)}list`;
+   toast(message, {
+      position: toast.POSITION.BOTTOM_CENTER,
+      type: "success",
       pauseOnFocusLoss: false,
       closeOnClick: true,
       closeButton: false,
