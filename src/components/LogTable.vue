@@ -16,7 +16,6 @@
                   <th class="fixed-width-12percent handled-by-column">Handled By</th>
                   <th class="hide-small fixed-width-10percent origin-client-column">Origin Client</th>
                   <th class="fixed-width-10percent status-column">Status</th>
-                  <th class="hide-small fixed-width-10percent action-taken-column">Action Taken</th>
                </tr>
             </thead>
             <tbody>
@@ -27,14 +26,13 @@
                   <td class="time-column">{{ log.time }}</td>
                   <td class="query-type-column">{{ log.queryType }}</td>
                   <td class="domain-queried-column" id="domain-queried-column" v-on:click="showAddToList($event, log.domainQueried)"
-                     :style=" { color: (log.actionTaken==='Blocked' && log.status.includes('Blocked')) ? 'red' : 'inherit'}">
+                     :style=" { color: (log.status.includes('Blocked')) ? 'red' : 'inherit'}">
                      {{ log.domainQueried }}</td>
                   <a :href="(log.handledBy === 'Proxmox') ? config.url : config.url2">
                      <td class="handled-by-column">{{ log.handledBy }}</td>
                   </a>
                   <td class="origin-client-column hide-small">{{ log.originClient }}</td>
                   <td class="status-column">{{ log.status }}</td>
-                  <td class="action-taken-column hide-small">{{ log.actionTaken }}</td>
                </tr>
             </tbody>
          </table>
