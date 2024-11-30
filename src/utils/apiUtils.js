@@ -106,7 +106,8 @@ const parseFetchedData = () => {
       ad_block_percentage,
       domains_blocked,
       gravity_last_updated,
-      piEnabled
+      piEnabled,
+      timeLeftReceived
    } = wsStateRefs.value;
    dns_queries_today.pi1 = wsData.value.data.pi1.dns_queries_today || 0;
    dns_queries_today.pi2 = wsData.value.data.pi2.dns_queries_today || 0;
@@ -120,6 +121,7 @@ const parseFetchedData = () => {
    gravity_last_updated.pi2 = wsData.value.data.pi2.gravity_last_updated || null;
    piEnabled.pi1 = (wsData.value.data.pi1.status === "enabled");
    piEnabled.pi2 = (wsData.value.data.pi2.status === "enabled");
+   timeLeftReceived.timeLeft = wsData.value.data.timeLeft;
 }
 
 /**
