@@ -30,7 +30,7 @@
 </template>
 
 <script setup lang="js">
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
+import { ref, computed, onMounted, onUpdated, watch } from 'vue';
 import StatusBox from '@/components/StatusBox.vue';
 import StatusColumnBox from '@/components/StatusColumnBox.vue';
 import ActionButtonGroup from '@/components/ActionButtonGroup.vue';
@@ -50,6 +50,7 @@ const remainingTime = ref(0);
 const logObjs = ref(new LogQueue());
 const toastTimerId = ref({ enabled: null, disabled: null });
 const toastShowing = ref({ enabled: false, disabled: false });
+const timeLeftReceived = ref({timeLeft: 0});
 // Computed properties
 const formattedTime = computed(() => {
    const minutes = Math.floor(remainingTime.value / 60)
@@ -71,11 +72,31 @@ onMounted(() => {
       gravity_last_updated,
       piEnabled,
       disableMinutes,
-      logObjs
+      logObjs,
+      timeLeftReceived
    };
 
    openSocket();
+   checkForTimeLeft();
 });
+
+onUpdated(() => {
+   checkForTimeLeft();
+   checkForTimerRunningWhileEnabled();
+})
+
+const checkForTimeLeft = () => {
+   if (remainingTime.value <= 0 && timeLeftReceived.value.timeLeft > 0) {
+      remainingTime.value = timeLeftReceived.value.timeLeft;
+      startTimer(remainingTime.value, true)
+   }
+}
+
+const checkForTimerRunningWhileEnabled = () => {
+   if (remainingTime.value > 0 && piEnabled.value.pi1 == true && piEnabled.value.pi2 == true) {
+      remainingTime.value = 0;
+   }
+}
 
 // Action handlers
 const disableNowByTimer = () => {
@@ -105,8 +126,8 @@ watch(remainingTime, (newValue, oldValue) => {
    }
 })
 
-const startTimer = (duration) => { // In Minutes
-   let timeLeft = duration * 60;
+const startTimer = (duration, isSeconds = false) => { // duration in minutes
+   let timeLeft = isSeconds ? duration : duration * 60;
    if (disabledTimer.value) {
       clearInterval(disabledTimer.value);
       disabledTimer.value = null;

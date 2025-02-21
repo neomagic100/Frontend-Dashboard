@@ -27,11 +27,9 @@ class Log {
       this.queryType = logArray[1]; // A or AAAA
       this.domainQueried = logArray[2];
       this.originClient = logArray[3];
-      const tempStatus = logArray[4]; // 0 Allowed by default, 1 Gravity Blocked, 2 allowed by whitelist, 14 Blocked by custom rule
-      this.status = tempStatus == '1' ? 'Gravity Blocked' : tempStatus == '2' ? 'Allowed by whitelist' : tempStatus == '14' ? 'Blocked by custom rule' : 'Allowed by default';
+      this.status = logArray[4]; 
       this.replyCode = logArray[5]; // 0 no error (From DNS)
-      const action = logArray[6]; // 2 - forwarded, 3 - cached, 0 - blocked
-      this.actionTaken = action == '2' ? 'Forwarded' : action == '3' ? 'Cached' : 'Blocked';
+      this.actionTaken = logArray[6];
       this.replyTime = logArray[7]; // milliseconds
       this.dnssecStatus = logArray[8]; // N/A - DNSSEC not used
       this.responseCode = logArray[9]; // -1 no further action needed
